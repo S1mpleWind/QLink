@@ -357,6 +357,12 @@
 			null
 		],
 		[
+			"D:/FILES_N_Data/GUI_file/QLink/GamePreset.h",
+			"MU",
+			"EWIEGA46WW/moc_GamePreset.cpp",
+			null
+		],
+		[
 			"D:/FILES_N_Data/GUI_file/QLink/GameScreen.h",
 			"MU",
 			"EWIEGA46WW/moc_GameScreen.cpp",
@@ -450,6 +456,7 @@
 		[ "D:/FILES_N_Data/GUI_file/QLink/GameMap.cpp", "MU", null ],
 		[ "D:/FILES_N_Data/GUI_file/QLink/GameMenu.cpp", "MU", null ],
 		[ "D:/FILES_N_Data/GUI_file/QLink/GamePlayer.cpp", "MU", null ],
+		[ "D:/FILES_N_Data/GUI_file/QLink/GamePreset.cpp", "MU", null ],
 		[ "D:/FILES_N_Data/GUI_file/QLink/GameScreen.cpp", "MU", null ],
 		[ "D:/FILES_N_Data/GUI_file/QLink/MainWindow.cpp", "MU", null ],
 		[ "D:/FILES_N_Data/GUI_file/QLink/StartScreen.cpp", "MU", null ],

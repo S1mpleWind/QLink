@@ -43,7 +43,8 @@ template <> constexpr inline auto GameMenu::qt_create_metaobjectdata<qt_meta_tag
         "resumeClicked",
         "",
         "restartClicked",
-        "exitClicked"
+        "exitClicked",
+        "fileClicked"
     };
 
     QtMocHelpers::UintData qt_methods {
@@ -53,6 +54,8 @@ template <> constexpr inline auto GameMenu::qt_create_metaobjectdata<qt_meta_tag
         QtMocHelpers::SignalData<void()>(3, 2, QMC::AccessPublic, QMetaType::Void),
         // Signal 'exitClicked'
         QtMocHelpers::SignalData<void()>(4, 2, QMC::AccessPublic, QMetaType::Void),
+        // Signal 'fileClicked'
+        QtMocHelpers::SignalData<void()>(5, 2, QMC::AccessPublic, QMetaType::Void),
     };
     QtMocHelpers::UintData qt_properties {
     };
@@ -79,6 +82,7 @@ void GameMenu::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, vo
         case 0: _t->resumeClicked(); break;
         case 1: _t->restartClicked(); break;
         case 2: _t->exitClicked(); break;
+        case 3: _t->fileClicked(); break;
         default: ;
         }
     }
@@ -88,6 +92,8 @@ void GameMenu::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, vo
         if (QtMocHelpers::indexOfMethod<void (GameMenu::*)()>(_a, &GameMenu::restartClicked, 1))
             return;
         if (QtMocHelpers::indexOfMethod<void (GameMenu::*)()>(_a, &GameMenu::exitClicked, 2))
+            return;
+        if (QtMocHelpers::indexOfMethod<void (GameMenu::*)()>(_a, &GameMenu::fileClicked, 3))
             return;
     }
 }
@@ -111,14 +117,14 @@ int GameMenu::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 3)
+        if (_id < 4)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 3;
+        _id -= 4;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 3)
+        if (_id < 4)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 3;
+        _id -= 4;
     }
     return _id;
 }
@@ -139,5 +145,11 @@ void GameMenu::restartClicked()
 void GameMenu::exitClicked()
 {
     QMetaObject::activate(this, &staticMetaObject, 2, nullptr);
+}
+
+// SIGNAL 3
+void GameMenu::fileClicked()
+{
+    QMetaObject::activate(this, &staticMetaObject, 3, nullptr);
 }
 QT_WARNING_POP

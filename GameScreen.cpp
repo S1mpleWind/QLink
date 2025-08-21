@@ -58,6 +58,8 @@ GameScreen::GameScreen(QWidget* parent)
     connect(gameMenu, &GameMenu::resumeClicked, this, &GameScreen::resumeGame);
     connect(gameMenu, &GameMenu::restartClicked, this, &GameScreen::restartGame);
     connect(gameMenu, &GameMenu::exitClicked, this, &GameScreen::exitGame);
+    connect(gameMenu, &GameMenu::fileClicked,this,&GameScreen::saveGame);
+
 
 
 
@@ -184,8 +186,22 @@ void GameScreen::restartGame() {
 }
 
 void GameScreen::exitGame() {
+    gameLogic->resetGame();
+    gameMenu->hide();
     close(); // 直接关闭整个窗口
     emit goBackToStartScreen();
+}
+
+
+void GameScreen::saveGame()
+{
+    gameLogic->saveGame("save.json");
+}
+
+
+void GameScreen::loadGame()
+{
+    gameLogic->loadGame("save.json");
 }
 
 

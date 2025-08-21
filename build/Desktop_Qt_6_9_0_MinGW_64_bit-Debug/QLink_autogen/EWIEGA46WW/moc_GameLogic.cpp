@@ -48,7 +48,11 @@ template <> constexpr inline auto GameLogic::qt_create_metaobjectdata<qt_meta_ta
         "timeIsUp",
         "setNormalMode",
         "receiveScores",
-        "countTime"
+        "countTime",
+        "generateRandomProp",
+        "saveGame",
+        "filePath",
+        "loadGame"
     };
 
     QtMocHelpers::UintData qt_methods {
@@ -78,6 +82,16 @@ template <> constexpr inline auto GameLogic::qt_create_metaobjectdata<qt_meta_ta
         }}),
         // Slot 'countTime'
         QtMocHelpers::SlotData<void()>(10, 2, QMC::AccessPublic, QMetaType::Void),
+        // Slot 'generateRandomProp'
+        QtMocHelpers::SlotData<void()>(11, 2, QMC::AccessPublic, QMetaType::Void),
+        // Slot 'saveGame'
+        QtMocHelpers::SlotData<void(const QString &)>(12, 2, QMC::AccessPublic, QMetaType::Void, {{
+            { QMetaType::QString, 13 },
+        }}),
+        // Slot 'loadGame'
+        QtMocHelpers::SlotData<void(const QString &)>(14, 2, QMC::AccessPublic, QMetaType::Void, {{
+            { QMetaType::QString, 13 },
+        }}),
     };
     QtMocHelpers::UintData qt_properties {
     };
@@ -110,6 +124,9 @@ void GameLogic::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         case 6: _t->setNormalMode(); break;
         case 7: _t->receiveScores((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
         case 8: _t->countTime(); break;
+        case 9: _t->generateRandomProp(); break;
+        case 10: _t->saveGame((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1]))); break;
+        case 11: _t->loadGame((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1]))); break;
         default: ;
         }
     }
@@ -148,14 +165,14 @@ int GameLogic::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 9)
+        if (_id < 12)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 9;
+        _id -= 12;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 9)
+        if (_id < 12)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 9;
+        _id -= 12;
     }
     return _id;
 }

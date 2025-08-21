@@ -9,6 +9,11 @@
 	"INCLUDE_DIR" : "D:/FILES_N_Data/GUI_file/QLink/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/QLink_autogen/include",
 	"INPUTS" : 
 	[
+		"D:/FILES_N_Data/GUI_file/QLink/images/prop_img/timer.png",
+		"D:/FILES_N_Data/GUI_file/QLink/images/prop_img/flash.png",
+		"D:/FILES_N_Data/GUI_file/QLink/images/prop_img/freeze.png",
+		"D:/FILES_N_Data/GUI_file/QLink/images/prop_img/hint.png",
+		"D:/FILES_N_Data/GUI_file/QLink/images/prop_img/shuffle.png",
 		"D:/FILES_N_Data/GUI_file/QLink/images/box_img/Flint.png",
 		"D:/FILES_N_Data/GUI_file/QLink/images/box_img/Mandrake.png",
 		"D:/FILES_N_Data/GUI_file/QLink/images/box_img/Nitre.png",

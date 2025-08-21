@@ -1,20 +1,35 @@
 #include "GameLogic.h"
+#include "GamePreset.h"
 #include <QTimer>
 #include <QDebug>
+#include <QRandomGenerator>
+
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QFile>
+
 GameLogic::GameLogic(GameMap * map)
     :gameMap(map)
-    ,remainingTime(gameTime)
+    ,remainingTime(GAME_TIME)
     ,gameTimer(new QTimer(this))
+    ,propTimer(new QTimer(this))
 
 {
     //connect(gameMap,&GameMap::checkCanLink,this,&GameLogic::setNormalMode);
     connect(gameTimer,&QTimer::timeout,this,&GameLogic::countTime);
     gameTimer->start(1000);
 
+
+    connect(propTimer,&QTimer::timeout,this,&GameLogic::generateRandomProp);
+    propTimer->start(PROP_GENERATE_TIME);
+
+
     bool checklink = connect(gameMap,&GameMap::checkCanLink,this,&GameLogic::canLink);
     //bool drawline = connect(this,&GameLogic::drawLineSignal,gameMap,&GameMap::update);
     qDebug() << "[DEBUG] connect result:" << checklink;
-    gamePlayer = new GamePlayer();
+
+    //gamePlayer = new GamePlayer();
+    initPlayer();
 
     //initialize player position
     updatePlayerPosition(gamePlayer->getPosition());
@@ -23,7 +38,11 @@ GameLogic::GameLogic(GameMap * map)
 
     connect(gamePlayer,&GamePlayer::scoreChanged,this,&GameLogic::receiveScores);
 
+    connect(gameMap,&GameMap::flashPosition,this,&GameLogic::updatePlayerPosition);
 
+
+    //initial for hint
+    updateEdgePts();
 }
 
 
@@ -33,9 +52,88 @@ GameLogic::~GameLogic()
 }
 
 
+void GameLogic::saveGame(const QString &filePath) {
+    QJsonObject root;
+
+    // 1. 存地图
+    QJsonArray mapArray;
+
+    int rowCount = gameMap->getRowNum() + 2*gameMap->getBufferNum();
+    int colCount = gameMap->getColNum() + 2*gameMap->getBufferNum();
+
+    for (int i = 0; i < rowCount; ++i) {
+        QJsonArray row;
+        for (int j = 0; j < colCount; ++j) {
+            row.append(gameMap->getBoxType(j, i));
+        }
+        mapArray.append(row);
+    }
+    root["map"] = mapArray;
+
+    // 2. 存玩家
+    QJsonObject playerObj;
+    playerObj["x"] = gamePlayer->getPosition().x();
+    playerObj["y"] = gamePlayer->getPosition().y();
+    playerObj["score"] = gamePlayer->getScore();
+    root["player"] = playerObj;
+
+    // 3. 写入文件
+    QJsonDocument doc(root);
+    QFile file(filePath);
+    if (file.open(QIODevice::WriteOnly)) {
+        file.write(doc.toJson());
+        file.close();
+    }
+}
+
+void GameLogic::loadGame(const QString &filePath) {
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly)) return;
+
+    QByteArray data = file.readAll();
+    file.close();
+
+    QJsonDocument doc = QJsonDocument::fromJson(data);
+    QJsonObject root = doc.object();
+
+    // 1. 恢复地图
+    QJsonArray mapArray = root["map"].toArray();
+    for (int i = 0; i < mapArray.size(); ++i) {
+        QJsonArray row = mapArray[i].toArray();
+        for (int j = 0; j < row.size(); ++j) {
+            gameMap->setBoxType(j, i, row[j].toInt());
+        }
+    }
+
+    // 2. 恢复玩家
+    QJsonObject playerObj = root["player"].toObject();
+    QPoint pos(playerObj["x"].toInt(), playerObj["y"].toInt());
+    gamePlayer->setPosition(pos);
+    gamePlayer->setScore(playerObj["score"].toInt());
+}
+
+
+
+void GameLogic::generateRandomProp()
+{
+    if(isPaused) return ;
+
+    QPoint pos = getRandomBufferCell();
+
+    int t = QRandomGenerator::global()->bounded(-8, -4);
+
+    gameMap->setBoxType(pos.x(),pos.y(),t);
+    gameMap->update();
+}
+
+
 void GameLogic::initPlayer()
 {
-
+    gamePlayer = new GamePlayer();
+    QPoint initPos = getRandomBufferCell();
+    gamePlayer->setPosition(initPos);
+    int x = initPos.x(), y = initPos.y();
+    gameMap->setBoxType(x,y,-1);
 }
 
 GamePlayer* GameLogic::getPlayer()
@@ -113,10 +211,6 @@ bool GameLogic::canLink(QPoint pt1, QPoint pt2) {
     //Basic conditions
     if (pt1 == pt2)
     {
-        // QTimer::singleShot(500, gameMap, [this]() {
-        //     gameMap->clearSelected();  // 500ms 后清空
-        // });
-        // return false;
         return delayClearSelect();
     }
 
@@ -164,6 +258,7 @@ bool GameLogic::canLink(QPoint pt1, QPoint pt2) {
                 gameMap->update();
             });
         }
+
 
         return true;
     }
@@ -289,6 +384,14 @@ void GameLogic::remove(QPoint pt_1 , QPoint pt_2)
     gameMap->update();
     //repaint the screen
 
+    if (!hintPts.empty() &&
+        ((pt_1 == hintPts[0] || pt_2 == hintPts[1]) ||
+         (pt_1 == hintPts[1] || pt_2 == hintPts[0]))) {
+        hintPts.clear();
+        hintPath.clear();
+        gameMap->disablePaintHint();
+    }
+
     updateEdgePts();
     remainUnmatchedPairs();
 
@@ -317,20 +420,63 @@ void GameLogic::updatePlayerPosition(QPoint newPos)
 
     QPoint prevPos = gamePlayer ->getPosition();
 
-    // 判断是否越界
+
+    // border
     if (row < 0 || row >= gameMap->getRowNum()+2*gameMap->getBufferNum() ||
         col < 0 || col >= gameMap->getColNum()+2*gameMap->getBufferNum()) {
         qDebug() << "Invalid move: out of bounds";
         return;
 
-        //TODO: wraparound function here
+        //TODO: wraparound function here ?
     }
 
-    // 判断是否撞到方块
-    if (gameMap->getBoxType(col, row) > 0) {
+
+    //check the border first
+    int t = gameMap->getBoxType(col, row);
+    // hit the tiles
+    if (t > 0) {
         //qDebug() << "Invalid move: hit a block";
         gameMap->addSelected(newPos);
         return;
+    }
+
+    //props
+    if(t < 0)
+    {
+        switch (t) {
+        //add one
+        case PROP_ADD_ONE:
+        {
+            remainingTime += ADD_TIME;
+            //qDebug()<<"remaining time"<<remainingTime;
+            emit updateTime(remainingTime);
+            break;
+        }
+
+        case PROP_FLASH:
+        {
+            gameMap->flashModeON();
+            QTimer::singleShot(FLASH_TIME,gameMap,&GameMap::flashModeOff);
+            break;
+        }
+
+        case PROP_HINT:
+        {
+            showHint();
+            break;
+        }
+
+        case PROP_SHUFFLE:
+        {
+            gameMap->shuffleMap();
+            updateEdgePts();
+            break;
+        }
+
+        default:
+            qDebug()<<"error when hiting props";
+            break;
+        }
     }
 
     // 更新玩家数据
@@ -392,11 +538,21 @@ void GameLogic:: remainUnmatchedPairs()
 
                     //this step will couse extra "clr pts"
 
+                    //In Detect mode , we record the possible path for the hint mode to call
+
+                    hintPath.clear();
+                    hintPath = validPath;
+
+                    hintPts.clear();
+                    hintPts.push_back(pts[i]);
+                    hintPts.push_back(pts[j]);
+
+
 
                     detectMode = false ;
                     qDebug()<<"remain unmatched pairs";
                     //gameMap->enablePaintPath();
-                return; // 找到可消除的一对
+                    return; // 找到可消除的一对
                 }
             }
         }
@@ -407,6 +563,26 @@ void GameLogic:: remainUnmatchedPairs()
     //throw it to game screen
 }
 
+
+void GameLogic::showHint() {
+    remainUnmatchedPairs();
+    if (hintPts.empty()) {
+        qDebug() << "No hint available";
+        return;
+    }
+
+    qDebug()<<hintPath;
+    qDebug()<<hintPts;
+    gameMap->enablePaintHint();
+    gameMap->setHintPath(hintPath);
+    gameMap->update();
+
+    //TODO:
+    QTimer::singleShot(10000, this, [=]() {
+        gameMap->disablePaintHint();
+        gameMap->update();
+    });
+}
 
 
 
@@ -421,9 +597,10 @@ void GameLogic::resetGamePara()
 {
     //TODO:
     gameMap->resetMap();
-    remainingTime = gameTime ;
+    remainingTime = GAME_TIME ;
     //gamePlayer->resetPlayer();
     //return;
+    gameMap->clearSelected();
 }
 
 void GameLogic::resetGamePlayer()
@@ -436,6 +613,7 @@ void GameLogic::resetGamePlayer()
 void GameLogic::resetGame()
 {
     resetGamePara();
-    resetGamePlayer();
+    //resetGamePlayer();
+    initPlayer();
     resumeGame();
 }

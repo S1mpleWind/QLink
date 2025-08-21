@@ -11,7 +11,7 @@ public:
     ~GamePlayer();
 
 
-    void initPlayer();
+    //void initPlayer();
 
     /*
     void moveUp();
@@ -22,7 +22,8 @@ public:
     void addFixedScore();
     void addScore(int);
     void clearScore();
-    int getScore(){return score;};
+    int  getScore(){return score;};
+    void setScore(int x){score = x;}
 
     void resetPlayer(){setPosition(QPoint(0,0));}
 

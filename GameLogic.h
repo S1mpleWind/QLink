@@ -6,7 +6,7 @@
 #include <QVector>
 #include <QPainter>
 
-#define gameTime 10
+
 
 class GameLogic : public QWidget
 {
@@ -82,9 +82,17 @@ private:
     QTimer* gameTimer;
     int remainingTime;
 
+    QTimer* propTimer;
+
 
     //control logic
     bool isPaused;
+
+    bool hintMode = false ;
+    QVector<QPoint> hintPath;
+
+    QVector<QPoint> hintPts;
+    void showHint();
 
 
 
@@ -92,6 +100,10 @@ public slots:
     void setNormalMode();
     void receiveScores(int);
     void countTime();
+
+    void generateRandomProp();   // 随机生成道具
+    void saveGame(const QString & filePath);
+    void loadGame(const QString & filePath);
 
 signals:
     void drawLineSignal();

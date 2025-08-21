@@ -639,6 +639,8 @@ QLink_autogen/timestamp: \
 	D:/FILES_N_Data/GUI_file/QLink/GameMenu.h \
 	D:/FILES_N_Data/GUI_file/QLink/GamePlayer.cpp \
 	D:/FILES_N_Data/GUI_file/QLink/GamePlayer.h \
+	D:/FILES_N_Data/GUI_file/QLink/GamePreset.cpp \
+	D:/FILES_N_Data/GUI_file/QLink/GamePreset.h \
 	D:/FILES_N_Data/GUI_file/QLink/GameScreen.cpp \
 	D:/FILES_N_Data/GUI_file/QLink/GameScreen.h \
 	D:/FILES_N_Data/GUI_file/QLink/MainWindow.cpp \
