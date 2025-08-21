@@ -1,7 +1,9 @@
 #include "GameMap.h"
+#include "GamePreset.h"
 #include <qpainter.h>
 #include <QMouseEvent>
 #include <QDebug>
+#include <QRandomGenerator>
 
 
 GameMap::GameMap (QWidget* parent)
@@ -92,20 +94,43 @@ void GameMap::paintEvent(QPaintEvent *)
     //qDebug()<<linkPath.isEmpty();
     //qDebug()<<paintPath;
     //画路径
+    drawLinkPath(&painter);
+
+    drawHintPath(&painter);
+
+}
+
+void GameMap::drawLinkPath(QPainter* painter) const
+{
+
     if (!linkPath.isEmpty()&&paintPath) {
         qDebug()<<"painting path";
-        painter.setPen(QPen(Qt::red, 0.1));
+        painter->setPen(QPen(Qt::red, 0.1));
         auto center = [](QPoint pt) -> QPointF {
             return QPointF(pt.x() + 0.5, pt.y() + 0.5);
         };
         for (int i = 0; i + 1 < linkPath.size(); ++i) {
-            painter.drawLine(center(linkPath[i]), center(linkPath[i + 1]));
+            painter->drawLine(center(linkPath[i]), center(linkPath[i + 1]));
         }
         //disablePaintPath();
     }
 }
 
 
+void GameMap::drawHintPath(QPainter* painter) const
+{
+    if (!hintPath.isEmpty()&&paintHintPath) {
+        qDebug()<<"painting hint path";
+        painter->setPen(QPen(Qt::red, 0.1));
+        auto center = [](QPoint pt) -> QPointF {
+            return QPointF(pt.x() + 0.5, pt.y() + 0.5);
+        };
+        for (int i = 0; i + 1 < hintPath.size(); ++i) {
+            painter->drawLine(center(hintPath[i]), center(hintPath[i + 1]));
+        }
+        //disablePaintPath();
+    }
+}
 
 void GameMap::drawMap(QPainter *painter) const
 {
@@ -118,12 +143,18 @@ void GameMap::drawMap(QPainter *painter) const
             {
                 drawBufferBox(painter , j , i);
             }
-            else if (mapType[i][j] == -1) {
+            else if (mapType[i][j] == -1)
+            {
                 //in case sth unexpected happens
                 //qDebug()<<"error when creating map";
                 drawPlayer(painter,j,i);
-            } else {
+            }
+            else if(mapType[i][j]>0){
                 drawPairBox(painter,j,i);
+            }
+            else
+            {
+                drawProp(painter,j,i,mapType[i][j]);
             }
         }
 }
@@ -218,6 +249,42 @@ void GameMap::drawPlayer(QPainter* painter ,int x,int y) const
 }
 
 
+void GameMap::drawProp(QPainter * painter,int x,int y , int t) const
+{
+    switch(t)
+    {
+        case PROP_ADD_ONE:
+        {
+            drawBufferBox(painter,x,y);
+            QPixmap propImg(propImgUrl[0]);
+            painter->drawPixmap(x, y, 1, 1, propImg);
+            break;
+        }
+        case PROP_FLASH:
+        {
+            drawBufferBox(painter,x,y);
+            QPixmap propImg(propImgUrl[1]);
+            painter->drawPixmap(x, y, 1, 1, propImg);
+            break;
+        }
+        case PROP_SHUFFLE:
+        {
+            drawBufferBox(painter,x,y);
+            QPixmap propImg(propImgUrl[2]);
+            painter->drawPixmap(x, y, 1, 1, propImg);
+            break;
+        }
+        case PROP_HINT:
+        {
+            drawBufferBox(painter,x,y);
+            QPixmap propImg(propImgUrl[3]);
+            painter->drawPixmap(x, y, 1, 1, propImg);
+            break;
+            break;
+        }
+        default: break;
+    }
+}
 
 
 
@@ -245,6 +312,8 @@ void GameMap::addSelected(QPoint pt)
 
 
 void GameMap::mousePressEvent(QMouseEvent* event) {
+    if(!flashMode) return;
+
     // 1. 与 paintEvent 相同的 viewport 计算
     int heightSide, widthSide;
     if (((double)(width()) / (double)(height())) > ((double)(totalCols) / (double)(totalRows))) {
@@ -274,14 +343,62 @@ void GameMap::mousePressEvent(QMouseEvent* event) {
     if (col >= 0 && col < totalCols && row >= 0 && row < totalRows) {
         QPoint clicked(col, row);
 
+        if(mapType[row][col]<=0)
+        {
+            emit flashPosition(clicked);
+        }
 
-        //coordinate（x,y）
-        // 保存为 selected1 或 selected2 并 update()
-
-        addSelected(clicked);
+        if(mapType[row][col]>0)
+        {
+            QPoint flashPoint = surroundBuffer(clicked);
+            if (flashPoint != clicked)
+            {
+                emit flashPosition(flashPoint);
+                addSelected(clicked);
+            }
+        }
 
     }
 }
+
+
+QPoint GameMap::surroundBuffer(QPoint pt)
+{
+    QVector<QPoint> candidate;
+    int x = pt.x();
+    int y = pt.y();
+
+    int rows = mapType.size();
+    int cols = mapType[0].size();
+
+    // up
+    if (y - 1 >= 0 && mapType[y - 1][x] == 0) {
+        candidate.push_back(QPoint(x, y - 1));
+    }
+    // down
+    if (y + 1 < rows && mapType[y + 1][x] == 0) {
+        candidate.push_back(QPoint(x, y + 1));
+    }
+    // left
+    if (x - 1 >= 0 && mapType[y][x - 1] == 0) {
+        candidate.push_back(QPoint(x - 1, y));
+    }
+    // right
+    if (x + 1 < cols && mapType[y][x + 1] == 0) {
+        candidate.push_back(QPoint(x + 1, y));
+    }
+
+    // if no available position, return original
+    if (candidate.isEmpty()) {
+        return pt;
+    }
+
+    // pick random one
+    int idx = QRandomGenerator::global()->bounded(candidate.size());
+    return candidate[idx];
+}
+
+
 
 
 void GameMap::clearSelected() {
@@ -300,7 +417,44 @@ QPoint GameMap::getSelectPt(int index){
 }
 
 
+#include <QRandomGenerator>
+#include <algorithm>   // for std::shuffle
 
+void GameMap::shuffleMap()
+{
+    int rows = getRowNum();
+    int cols = getColNum();
+    int buffer = getBufferNum();
+
+    QVector<int> tiles;
+
+    // 1. 收集所有方块（去掉玩家、空格、特殊元素的话这里可以过滤）
+    for (int y = buffer; y < rows + buffer; ++y) {
+        for (int x = buffer; x < cols + buffer; ++x) {
+            int val = mapType[y][x];
+            if (val != 0 && val != -1) {
+                tiles.push_back(val);
+            }
+        }
+    }
+
+    // 2. 随机打乱
+    std::shuffle(tiles.begin(), tiles.end(), *QRandomGenerator::global());
+
+    // 3. 重新写回
+    int idx = 0;
+    for (int y = buffer; y < rows + buffer; ++y) {
+        for (int x = buffer; x < cols + buffer; ++x) {
+            int val = mapType[y][x];
+            if (val != 0 && val != -1) {
+                mapType[y][x] = tiles[idx++];
+            }
+        }
+    }
+
+    // 4. 更新显示
+    update();
+}
 
 
 

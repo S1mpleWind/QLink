@@ -2,6 +2,7 @@
 #include <QWidget>
 #include <Qvector>
 
+
 //#define MAX_MAP_SIZE 60
 
 
@@ -29,16 +30,34 @@ public:
     void setLinkPath(const QVector<QPoint> & path){
         linkPath = path;
     }
+    void setHintPath(const QVector<QPoint> & path)
+    {
+        hintPath = path ;
+    }
+
+
 
     void enablePaintPath(){paintPath = true;
         qDebug()<<"enable paint path";}
     void disablePaintPath(){paintPath = false;
         qDebug()<<"disable paint path";}
 
+    void enablePaintHint(){paintHintPath = true;
+        qDebug()<<"enable paint hint";}
+    void disablePaintHint(){paintHintPath = false;
+        qDebug()<<"disable paint hint";}
+
     void clearSelected();
     void addSelected(QPoint);
 
     void resetMap(){initMap();}
+
+    void flashModeON(){ flashMode = true ; }
+    void flashModeOff(){flashMode = false; }
+
+    QPoint surroundBuffer(QPoint);
+
+    void shuffleMap();
 
 
 
@@ -50,15 +69,23 @@ public:
 
 signals:
     void checkCanLink(QPoint,QPoint);
+    void flashPosition(QPoint);
 
 
 protected:
     void paintEvent(QPaintEvent* event) override;
+
     void drawMap(QPainter *painter) const;
     void drawBufferBox(QPainter* painter,int , int) const;
     void drawPairBox(QPainter* painter , int , int) const;
     void drawPlayer(QPainter* painter,int,int) const;
     void highlightSelectedPt(QPainter* painter) const;
+
+    void drawLinkPath(QPainter* painter) const;
+    void drawHintPath(QPainter* painter) const;
+
+
+    void drawProp(QPainter *painter,int,int,int) const;
 
 
 
@@ -90,6 +117,10 @@ private:
     QVector<QPoint> linkPath;
     bool paintPath = true;
 
+    QVector<QPoint> hintPath;
+    bool paintHintPath = true;
+
+
     QVector<QPoint> selectedPts;
 
     int boxType = 20 ;
@@ -116,4 +147,16 @@ private:
         ":/img/images/box_img/Twigs.png",
         ":/img/images/box_img/Watermelon.png"
     };
+
+
+    QVector<QString>propImgUrl={
+        ":/img/images/prop_img/timer.png",
+        ":/img/images/prop_img/flash.png",
+        ":/img/images/prop_img/shuffle.png",
+        ":/img/images/prop_img/hint.png"
+    };
+
+
+    bool flashMode = false ;
+
 };

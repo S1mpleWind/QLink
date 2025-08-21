@@ -28,6 +28,10 @@ private slots:
     void restartGame();
     void exitGame();
     void onGameOver();
+    void saveGame();
+
+public slots:
+    void loadGame();
 
 
 private:

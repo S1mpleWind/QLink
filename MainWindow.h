@@ -31,6 +31,7 @@ private:
     GameScreen* gameScreen;
 
 private slots:
+    void loadGame();
 
 
 

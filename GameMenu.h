@@ -23,6 +23,7 @@ signals:
     void resumeClicked();   // 继续游戏
     void restartClicked();  // 重新开始
     void exitClicked();     // 退出游戏
+    void fileClicked();
 
 private:
     QStackedWidget* stacked;   // 用来切换 Pause / End
@@ -32,6 +33,7 @@ private:
     QPushButton* resumeButton;
     QPushButton* restartButton;
     QPushButton* exitButton;
+    QPushButton* writeButton;
 
     // End 菜单
     QLabel* endTitle;

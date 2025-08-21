@@ -30,6 +30,8 @@ void GameMenu::setupUI() {
 
     connect(endRestartButton, &QPushButton::clicked, this, &GameMenu::restartClicked);
     connect(endExitButton,    &QPushButton::clicked, this, &GameMenu::exitClicked);
+
+    connect(writeButton,      &QPushButton::clicked, this, &GameMenu::fileClicked);
 }
 
 void GameMenu::setupPauseMenu()
@@ -50,12 +52,14 @@ void GameMenu::setupPauseMenu()
     resumeButton  = new QPushButton("Resume",  pausePanel);
     restartButton = new QPushButton("Restart", pausePanel);
     exitButton    = new QPushButton("Exit",    pausePanel);
+    writeButton   = new QPushButton("File",    pausePanel);
 
     pv->addWidget(pauseTitle);
     pv->addStretch();
     pv->addWidget(resumeButton);
     pv->addWidget(restartButton);
     pv->addWidget(exitButton);
+    pv->addWidget(writeButton);
 
     stacked->addWidget(pausePanel);
 }

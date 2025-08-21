@@ -19,11 +19,6 @@ GamePlayer::GamePlayer()
 
 
 
-void GamePlayer::initPlayer()
-{
-
-}
-
 
 GamePlayer::~GamePlayer()
 {

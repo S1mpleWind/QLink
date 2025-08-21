@@ -39,6 +39,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         GamePlayer.cpp
         GameMenu.h
         GameMenu.cpp
+        GamePreset.h
+        GamePreset.cpp
 
 
 

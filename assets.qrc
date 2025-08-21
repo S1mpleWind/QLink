@@ -28,5 +28,10 @@
         <file>images/box_img/Twigs.png</file>
         <file>images/box_img/Watermelon.png</file>
         <file>images/box_img/blockroad.png</file>
+        <file>images/prop_img/timer.png</file>
+        <file>images/prop_img/freeze.png</file>
+        <file>images/prop_img/shuffle.png</file>
+        <file>images/prop_img/flash.png</file>
+        <file>images/prop_img/hint.png</file>
     </qresource>
 </RCC>

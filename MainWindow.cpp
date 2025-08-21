@@ -17,6 +17,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(startScreen->getQuitButton(), &QPushButton::clicked, this, &QWidget::close);
 
+
+    connect(startScreen->getReadButton(),&QPushButton::clicked, this, &MainWindow::loadGame);
+
     connect(gameScreen,&GameScreen::goBackToStartScreen,this,&MainWindow::showStartScreen);
 
 
@@ -45,6 +48,12 @@ void MainWindow::showGameScreen()
     //gameScreen
 }
 
+void MainWindow::loadGame()
+{
+    gameScreen->loadGame();
+    gameScreen->recoverGame();
+    stackWidget->setCurrentWidget(gameScreen);
+}
 
 void MainWindow::initMainWindow()
 {
