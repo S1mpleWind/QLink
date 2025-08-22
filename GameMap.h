@@ -47,8 +47,10 @@ public:
     void disablePaintHint(){paintHintPath = false;
         qDebug()<<"disable paint hint";}
 
-    void clearSelected();
+    void clearSelected(int);
     void addSelected(QPoint);
+    void addSelected2(QPoint);
+
 
     void resetMap(){initMap();}
 
@@ -59,6 +61,8 @@ public:
 
     void shuffleMap();
 
+    void multiModeOn(){ multimode = true;}
+    void multimodeOff(){multimode = false;}
 
 
 
@@ -68,8 +72,8 @@ public:
 
 
 signals:
-    void checkCanLink(QPoint,QPoint);
-    void flashPosition(QPoint);
+    void checkCanLink(QPoint,QPoint,int);
+    void flashPosition(int , QPoint);
 
 
 protected:
@@ -79,6 +83,8 @@ protected:
     void drawBufferBox(QPainter* painter,int , int) const;
     void drawPairBox(QPainter* painter , int , int) const;
     void drawPlayer(QPainter* painter,int,int) const;
+    void drawPlayer2(QPainter* painter,int,int) const;
+
     void highlightSelectedPt(QPainter* painter) const;
 
     void drawLinkPath(QPainter* painter) const;
@@ -122,6 +128,8 @@ private:
 
 
     QVector<QPoint> selectedPts;
+    QVector<QPoint> selectedPts2;
+
 
     int boxType = 20 ;
     QVector<QString> boxImgUrl = {
@@ -158,5 +166,7 @@ private:
 
 
     bool flashMode = false ;
+
+    bool multimode = false ;
 
 };

@@ -65,8 +65,8 @@ template <> constexpr inline auto GameLogic::qt_create_metaobjectdata<qt_meta_ta
         // Signal 'noMoreValidPairs'
         QtMocHelpers::SignalData<void()>(4, 2, QMC::AccessPublic, QMetaType::Void),
         // Signal 'updateScores'
-        QtMocHelpers::SignalData<void(int)>(5, 2, QMC::AccessPublic, QMetaType::Void, {{
-            { QMetaType::Int, 2 },
+        QtMocHelpers::SignalData<void(int, int)>(5, 2, QMC::AccessPublic, QMetaType::Void, {{
+            { QMetaType::Int, 2 }, { QMetaType::Int, 2 },
         }}),
         // Signal 'updateTime'
         QtMocHelpers::SignalData<void(int)>(6, 2, QMC::AccessPublic, QMetaType::Void, {{
@@ -118,7 +118,7 @@ void GameLogic::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         case 0: _t->drawLineSignal(); break;
         case 1: _t->deletePtSignal((*reinterpret_cast< std::add_pointer_t<QPoint>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<QPoint>>(_a[2]))); break;
         case 2: _t->noMoreValidPairs(); break;
-        case 3: _t->updateScores((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
+        case 3: _t->updateScores((*reinterpret_cast< std::add_pointer_t<int>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<int>>(_a[2]))); break;
         case 4: _t->updateTime((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
         case 5: _t->timeIsUp(); break;
         case 6: _t->setNormalMode(); break;
@@ -137,7 +137,7 @@ void GameLogic::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
             return;
         if (QtMocHelpers::indexOfMethod<void (GameLogic::*)()>(_a, &GameLogic::noMoreValidPairs, 2))
             return;
-        if (QtMocHelpers::indexOfMethod<void (GameLogic::*)(int )>(_a, &GameLogic::updateScores, 3))
+        if (QtMocHelpers::indexOfMethod<void (GameLogic::*)(int , int )>(_a, &GameLogic::updateScores, 3))
             return;
         if (QtMocHelpers::indexOfMethod<void (GameLogic::*)(int )>(_a, &GameLogic::updateTime, 4))
             return;
@@ -196,9 +196,9 @@ void GameLogic::noMoreValidPairs()
 }
 
 // SIGNAL 3
-void GameLogic::updateScores(int _t1)
+void GameLogic::updateScores(int _t1, int _t2)
 {
-    QMetaObject::activate<void>(this, &staticMetaObject, 3, nullptr, _t1);
+    QMetaObject::activate<void>(this, &staticMetaObject, 3, nullptr, _t1, _t2);
 }
 
 // SIGNAL 4

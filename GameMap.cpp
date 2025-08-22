@@ -143,10 +143,26 @@ void GameMap::drawMap(QPainter *painter) const
             {
                 drawBufferBox(painter , j , i);
             }
+
+            //in multimode draw player 2
+            else if (mapType[i][j] == -2)
+            {
+                if (multimode)
+                {
+                    qDebug()<<"drawplayer 2";
+                    drawPlayer2(painter,j,i);
+                }
+
+                else {
+                    drawBufferBox(painter , j , i);
+                    //setBoxType(j,i,0);
+                }
+            }
+
             else if (mapType[i][j] == -1)
             {
                 //in case sth unexpected happens
-                //qDebug()<<"error when creating map";
+                qDebug()<<"drawplayer 1";
                 drawPlayer(painter,j,i);
             }
             else if(mapType[i][j]>0){
@@ -161,7 +177,7 @@ void GameMap::drawMap(QPainter *painter) const
 
 void GameMap::highlightSelectedPt(QPainter* painter) const
 {
-    if (selectedPts.empty())
+    if (selectedPts.empty()&&selectedPts2.empty())
     {
         return;
     }
@@ -171,6 +187,16 @@ void GameMap::highlightSelectedPt(QPainter* painter) const
 
     for (const QPoint& pt : selectedPts) {
         painter->drawRect(QRectF(pt.x(), pt.y(), 1, 1));  // 给选中方块画黄色边框
+    }
+
+    if(multimode)
+    {
+        painter->setPen(QPen(Qt::green, 0.1));
+        painter->setBrush(Qt::NoBrush);
+
+        for (const QPoint& pt : selectedPts2) {
+            painter->drawRect(QRectF(pt.x(), pt.y(), 1, 1));  // 给选中方块画黄色边框
+        }
     }
 
 }
@@ -249,6 +275,14 @@ void GameMap::drawPlayer(QPainter* painter ,int x,int y) const
 }
 
 
+void GameMap::drawPlayer2(QPainter* painter ,int x,int y) const
+{
+    painter->setBrush(Qt::red);
+    painter->drawRect(x,y,1,1);
+    //qDebug()<<"drawing player";
+}
+
+
 void GameMap::drawProp(QPainter * painter,int x,int y , int t) const
 {
     switch(t)
@@ -299,11 +333,24 @@ void GameMap::addSelected(QPoint pt)
 
     if (selectedPts.length()==2)
     {
-        emit checkCanLink(selectedPts[0],selectedPts[1]);
+        emit checkCanLink(selectedPts[0],selectedPts[1],1);
     }
    //qDebug()<<selectedPts.length();
 }
 
+void GameMap::addSelected2(QPoint pt)
+{
+    qDebug()<<"the selected pt is"<<pt;
+    selectedPts2.push_back(pt);
+    update();
+    //更新绘制
+
+    if (selectedPts2.length()==2)
+    {
+        emit checkCanLink(selectedPts2[0],selectedPts2[1],2);
+    }
+    //qDebug()<<selectedPts.length();
+}
 
 
 
@@ -345,7 +392,7 @@ void GameMap::mousePressEvent(QMouseEvent* event) {
 
         if(mapType[row][col]<=0)
         {
-            emit flashPosition(clicked);
+            emit flashPosition(1,clicked);
         }
 
         if(mapType[row][col]>0)
@@ -353,7 +400,7 @@ void GameMap::mousePressEvent(QMouseEvent* event) {
             QPoint flashPoint = surroundBuffer(clicked);
             if (flashPoint != clicked)
             {
-                emit flashPosition(flashPoint);
+                emit flashPosition(1,flashPoint);
                 addSelected(clicked);
             }
         }
@@ -401,8 +448,9 @@ QPoint GameMap::surroundBuffer(QPoint pt)
 
 
 
-void GameMap::clearSelected() {
-    selectedPts.clear();
+void GameMap::clearSelected(int index) {
+    if(index == 1)selectedPts.clear();
+    else selectedPts2.clear();
     qDebug()<<"clr pts";
     update();
 }

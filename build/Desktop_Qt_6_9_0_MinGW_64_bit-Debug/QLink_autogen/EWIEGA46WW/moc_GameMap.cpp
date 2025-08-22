@@ -46,12 +46,12 @@ template <> constexpr inline auto GameMap::qt_create_metaobjectdata<qt_meta_tag_
 
     QtMocHelpers::UintData qt_methods {
         // Signal 'checkCanLink'
-        QtMocHelpers::SignalData<void(QPoint, QPoint)>(1, 2, QMC::AccessPublic, QMetaType::Void, {{
-            { QMetaType::QPoint, 2 }, { QMetaType::QPoint, 2 },
+        QtMocHelpers::SignalData<void(QPoint, QPoint, int)>(1, 2, QMC::AccessPublic, QMetaType::Void, {{
+            { QMetaType::QPoint, 2 }, { QMetaType::QPoint, 2 }, { QMetaType::Int, 2 },
         }}),
         // Signal 'flashPosition'
-        QtMocHelpers::SignalData<void(QPoint)>(3, 2, QMC::AccessPublic, QMetaType::Void, {{
-            { QMetaType::QPoint, 2 },
+        QtMocHelpers::SignalData<void(int, QPoint)>(3, 2, QMC::AccessPublic, QMetaType::Void, {{
+            { QMetaType::Int, 2 }, { QMetaType::QPoint, 2 },
         }}),
     };
     QtMocHelpers::UintData qt_properties {
@@ -76,15 +76,15 @@ void GameMap::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, voi
     auto *_t = static_cast<GameMap *>(_o);
     if (_c == QMetaObject::InvokeMetaMethod) {
         switch (_id) {
-        case 0: _t->checkCanLink((*reinterpret_cast< std::add_pointer_t<QPoint>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<QPoint>>(_a[2]))); break;
-        case 1: _t->flashPosition((*reinterpret_cast< std::add_pointer_t<QPoint>>(_a[1]))); break;
+        case 0: _t->checkCanLink((*reinterpret_cast< std::add_pointer_t<QPoint>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<QPoint>>(_a[2])),(*reinterpret_cast< std::add_pointer_t<int>>(_a[3]))); break;
+        case 1: _t->flashPosition((*reinterpret_cast< std::add_pointer_t<int>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<QPoint>>(_a[2]))); break;
         default: ;
         }
     }
     if (_c == QMetaObject::IndexOfMethod) {
-        if (QtMocHelpers::indexOfMethod<void (GameMap::*)(QPoint , QPoint )>(_a, &GameMap::checkCanLink, 0))
+        if (QtMocHelpers::indexOfMethod<void (GameMap::*)(QPoint , QPoint , int )>(_a, &GameMap::checkCanLink, 0))
             return;
-        if (QtMocHelpers::indexOfMethod<void (GameMap::*)(QPoint )>(_a, &GameMap::flashPosition, 1))
+        if (QtMocHelpers::indexOfMethod<void (GameMap::*)(int , QPoint )>(_a, &GameMap::flashPosition, 1))
             return;
     }
 }
@@ -121,14 +121,14 @@ int GameMap::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 }
 
 // SIGNAL 0
-void GameMap::checkCanLink(QPoint _t1, QPoint _t2)
+void GameMap::checkCanLink(QPoint _t1, QPoint _t2, int _t3)
 {
-    QMetaObject::activate<void>(this, &staticMetaObject, 0, nullptr, _t1, _t2);
+    QMetaObject::activate<void>(this, &staticMetaObject, 0, nullptr, _t1, _t2, _t3);
 }
 
 // SIGNAL 1
-void GameMap::flashPosition(QPoint _t1)
+void GameMap::flashPosition(int _t1, QPoint _t2)
 {
-    QMetaObject::activate<void>(this, &staticMetaObject, 1, nullptr, _t1);
+    QMetaObject::activate<void>(this, &staticMetaObject, 1, nullptr, _t1, _t2);
 }
 QT_WARNING_POP

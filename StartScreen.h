@@ -24,6 +24,8 @@ protected:
     void paintEvent(QPaintEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
 
+
+
 private:
     //Menu UI
     QHBoxLayout* mainLayout;
@@ -36,4 +38,13 @@ private:
     QPushButton readButton;
     QPushButton quitButton;
     void adjustButtonSizes();
+
+    int gameMode;
+
+
+private slots:
+    void changeMode();
+
+signals:
+    void switchmode(int);
 };

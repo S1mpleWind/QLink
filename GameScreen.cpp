@@ -19,11 +19,17 @@ GameScreen::GameScreen(QWidget* parent)
 
 
     //UI
-    scoreLabel = new QLabel(this);
-    scoreLabel->setText(QString("Score: %1").arg(displayScore));
-    scoreLabel->setAlignment(Qt::AlignCenter);
-    scoreLabel->setStyleSheet("font: bold 16px; color: white;"); // 可根据需要美化
-    scoreLabel->setFixedHeight(40);
+    scoreLabel1 = new QLabel(this);
+    scoreLabel1->setText(QString("Score: %1").arg(displayScore));
+    scoreLabel1->setAlignment(Qt::AlignCenter);
+    scoreLabel1->setStyleSheet("font: bold 16px; color: white;"); // 可根据需要美化
+    scoreLabel1->setFixedHeight(40);
+
+    scoreLabel2 = new QLabel(this);
+    scoreLabel2->setText(QString("Score: %1").arg(displayScore));
+    scoreLabel2->setAlignment(Qt::AlignCenter);
+    scoreLabel2->setStyleSheet("font: bold 16px; color: white;"); // 可根据需要美化
+    scoreLabel2->setFixedHeight(40);
 
     timeLabel = new QLabel(this);
     timeLabel->setText(QString("Remaining time : %1").arg(remainingTime));
@@ -32,7 +38,7 @@ GameScreen::GameScreen(QWidget* parent)
     timeLabel->setFixedHeight(40);
 
     QHBoxLayout* menuBar = new QHBoxLayout();
-    menuBar->addWidget(scoreLabel);
+    menuBar->addWidget(scoreLabel1);
     menuBar->addWidget(timeLabel);
 
     // 创建一个布局
@@ -65,8 +71,8 @@ GameScreen::GameScreen(QWidget* parent)
 
     connect(gameLogic, &GameLogic::noMoreValidPairs,this,&GameScreen::pauseGame);
 
-    connect(gameLogic,&GameLogic::updateScores,this,&GameScreen::updateScoreDisplay);
     connect(gameLogic,&GameLogic::updateTime,this,&GameScreen::updateTimeDisplay);
+    connect(gameLogic,&GameLogic::updateScores,this,&GameScreen::updateScoreDisplay);
 
 
     connect(gameLogic,&GameLogic::timeIsUp,this,&GameScreen::onGameOver);
@@ -102,10 +108,13 @@ void GameScreen::resizeEvent(QResizeEvent* e) {
 }
 
 
-void GameScreen::updateScoreDisplay(int s)
+void GameScreen::updateScoreDisplay(int s, int index)
 {
-    displayScore = s ;
-    scoreLabel->setText(QString("Score: %1").arg(displayScore));
+    if (index == 1) {
+        scoreLabel1->setText(QString("P1: %1").arg(s));
+    } else if (index == 2) {
+        scoreLabel2->setText(QString("P2: %1").arg(s));
+    }
 }
 
 void GameScreen::updateTimeDisplay(int t)
@@ -122,31 +131,29 @@ void GameScreen::keyPressEvent(QKeyEvent* event) {
         return;
     }
 
-    QPoint newPos = gameLogic->getPlayerPosition();
+    QPoint pos1 = gameLogic->getPlayerPosition(1);
+    QPoint pos2 = gameLogic->getPlayerPosition(2);
+
+
+
     switch (event->key()) {
-    case Qt::Key_W:
-    case Qt::Key_Up:
-        //qDebug()<<"moveup";
-        newPos.ry() -= 1;
-        break;
-    case Qt::Key_S:
-    case Qt::Key_Down:
-        //qDebug()<<"movedown";
-        newPos.ry() += 1;
-        break;
-    case Qt::Key_A:
-    case Qt::Key_Left:
-        //qDebug()<<"moveleft";
-        newPos.rx() -= 1;
-        break;
-    case Qt::Key_D:
-    case Qt::Key_Right:
-        //qDebug()<<"moveright";
-        newPos.rx() += 1;
-        break;
+    // 玩家1 (WASD)
+    case Qt::Key_W: pos1.ry() -= 1; break;
+    case Qt::Key_S: pos1.ry() += 1; break;
+    case Qt::Key_A: pos1.rx() -= 1; break;
+    case Qt::Key_D: pos1.rx() += 1; break;
+
+        // 玩家2 (↑↓←→)
+    case Qt::Key_I:    qDebug()<<"up"; pos2.ry() -= 1 ;  break;
+    case Qt::Key_K:  pos2.ry() += 1; break;
+    case Qt::Key_J:  pos2.rx() -= 1; break;
+    case Qt::Key_L: pos2.rx() += 1; break;
     }
-    gameLogic->updatePlayerPosition(newPos);
-    update(); // 触发重绘
+
+    gameLogic->updatePlayerPosition(1, pos1);
+
+    gameLogic->updatePlayerPosition(2, pos2);
+    update();
 }
 
 
@@ -181,7 +188,7 @@ void GameScreen::resumeGame() {
 
 void GameScreen::restartGame() {
     gameMenu->hide();
-    gameLogic->resetGame();   // 假设 GameLogic 有个 resetGame()
+    gameLogic->resetGame();
     update();
 }
 
@@ -206,14 +213,31 @@ void GameScreen::loadGame()
 
 
 void GameScreen::onGameOver() {
-    // 从 player 拿到分数
-    int finalScore = gameLogic->getPlayer()->getScore();
+    int score1 = gameLogic->getScore(1);
+    int score2 = gameLogic->getScore(2);
+
+    QString result;
+    if (gameLogic->getMode() == 1) {
+        result = QString("Final Score: %1").arg(score1);
+    } else {
+        if (score1 > score2)
+            result = QString("P1 Wins! (%1 vs %2)").arg(score1).arg(score2);
+        else if (score2 > score1)
+            result = QString("P2 Wins! (%1 vs %2)").arg(score2).arg(score1);
+        else
+            result = QString("Draw! (%1 vs %2)").arg(score1).arg(score2);
+    }
 
     setPause();
-
-    // 传给 GameMenu
-    gameMenu->setFinalScore(finalScore);
-
-    // 显示结束菜单
+    gameMenu->setFinalScoreText(result);
     gameMenu->showEndMenu();
 }
+
+
+void GameScreen::setMode(int a)
+{
+    gameLogic->setGameMode(a);
+}
+
+
+

@@ -1,10 +1,11 @@
 #include "StartScreen.h"
+#include <QPushButton>
 
 StartScreen::StartScreen(QWidget* parent) :
      QWidget(parent)
     ,helperButton("帮助")
     ,startButton("开始游戏")
-    ,modeButton("游戏模式")
+    ,modeButton("游戏模式：单人")
     ,quitButton("退出游戏")
     ,readButton("读取存档")
 {
@@ -27,6 +28,9 @@ StartScreen::StartScreen(QWidget* parent) :
     setLayout(mainLayout);
 
     adjustButtonSizes();
+
+    connect(&modeButton, &QPushButton::clicked , this ,&StartScreen::changeMode);
+
 }
 
 
@@ -36,6 +40,24 @@ StartScreen::~StartScreen()
 
 }
 
+void StartScreen::changeMode()
+{
+    if(gameMode == 1)
+    {
+        modeButton.setText("游戏模式：双人");
+        gameMode = 2;
+
+    }
+
+    else
+    {
+        modeButton.setText("游戏模式：单人");
+        gameMode = 1;
+    }
+
+    qDebug()<<"gamemode"<<gameMode;
+    emit switchmode(gameMode);
+}
 
 void StartScreen::paintEvent(QPaintEvent* event)
 {

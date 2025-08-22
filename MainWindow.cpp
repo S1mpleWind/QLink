@@ -22,6 +22,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(gameScreen,&GameScreen::goBackToStartScreen,this,&MainWindow::showStartScreen);
 
+    connect(startScreen,&StartScreen::switchmode,gameScreen,&GameScreen::setMode);
+
 
 
 }
