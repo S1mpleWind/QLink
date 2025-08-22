@@ -38,7 +38,7 @@ void GamePlayer::setPosition(const QPoint& pos) {
 void GamePlayer::addFixedScore()
 {
     score+=10;
-    emit scoreChanged(score);
+    //emit scoreChanged(score);
 }
 
 void GamePlayer::addScore(int s)

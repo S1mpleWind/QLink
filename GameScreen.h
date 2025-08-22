@@ -32,6 +32,10 @@ private slots:
 
 public slots:
     void loadGame();
+    void setMode(int);
+
+    //void updateScoreDisplay(int s , int index);
+
 
 
 private:
@@ -39,7 +43,8 @@ private:
     GameLogic* gameLogic;
     GameMenu* gameMenu;
 
-    QLabel* scoreLabel;
+    QLabel* scoreLabel1;
+    QLabel* scoreLabel2;
     int displayScore = 0 ;
 
     QLabel* timeLabel;
@@ -58,7 +63,7 @@ private:
         ":/img/images/background_img/background_6.png"
 };
 private slots:
-    void updateScoreDisplay(int);
+    void updateScoreDisplay(int,int);
     void updateTimeDisplay(int);
 
 signals:

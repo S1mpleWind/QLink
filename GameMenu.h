@@ -13,7 +13,7 @@ public:
     explicit GameMenu(QWidget* parent = nullptr);
     ~GameMenu();
 
-    void setFinalScore(int);
+    void setFinalScoreText(QString);
 
     void showPauseMenu();   // 显示暂停菜单
     void showEndMenu();     // 显示结束菜单

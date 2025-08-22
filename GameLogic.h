@@ -17,8 +17,8 @@ public:
     ~GameLogic();
 
 //获取player信息的接口
-    QPoint getPlayerPosition();
-    GamePlayer* getPlayer();
+    QPoint getPlayerPosition(int);
+    GamePlayer* getPlayer(int);
     //TODO : use index in multiplayer mode
     /*
     void movePlayerUp();
@@ -27,7 +27,7 @@ public:
 */
     void movePlayerRight();
 
-    void updatePlayerPosition(QPoint);
+    void updatePlayerPosition(int , QPoint);
     void updateEdgePts();
 
     void remainUnmatchedPairs();
@@ -39,9 +39,14 @@ public:
     void pauseGame(){isPaused=true;};
     void resumeGame(){isPaused=false;};
 
+    void setGameMode(int a);
+
+    int getScore(int);
+
+    int getMode(){return gameMode;}
 
 protected:    //judge a legal link
-    bool canLink(QPoint pt_1,QPoint pt_2);
+    bool canLink(QPoint pt_1,QPoint pt_2 ,int index);
 
     bool isEmptyTile(QPoint);
     bool isClearRow(int row , int col_1 , int col_2);
@@ -59,7 +64,7 @@ protected:    //judge a legal link
 
     //void drawLinkPath(QPainter&,QPoint,QPoint);
 
-    bool delayClearSelect();
+    bool delayClearSelect(int);
 
 
 
@@ -70,7 +75,10 @@ private:
     GameMap* gameMap;
 
     GamePlayer * gamePlayer;
-    void initPlayer();
+
+    GamePlayer * gamePlayer2;
+
+    void initPlayer(int);
     QPoint getRandomBufferCell();
 
     QVector<QPoint> validPath;
@@ -80,6 +88,7 @@ private:
     bool detectMode = false ;
 
     QTimer* gameTimer;
+
     int remainingTime;
 
     QTimer* propTimer;
@@ -93,6 +102,8 @@ private:
 
     QVector<QPoint> hintPts;
     void showHint();
+
+    int gameMode = 1 ;
 
 
 
@@ -109,7 +120,9 @@ signals:
     void drawLineSignal();
     void deletePtSignal(QPoint,QPoint);
     void noMoreValidPairs();
-    void updateScores(int);
+
+    void updateScores(int,int);
+
     void updateTime(int);
     void timeIsUp();
 

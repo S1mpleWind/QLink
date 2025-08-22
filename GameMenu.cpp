@@ -112,8 +112,8 @@ void GameMenu::hideMenu() {
     hide();
 }
 
-void GameMenu::setFinalScore(int score)
+void GameMenu::setFinalScoreText(QString s)
 {
-    finalScoreLabel->setText(QString("Score: %1").arg(score));
-    qDebug()<<"update final score"<<score;
+    finalScoreLabel->setText(s);
+    //qDebug()<<"update final score"<<score;
 }
