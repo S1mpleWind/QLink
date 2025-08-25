@@ -14,6 +14,9 @@ public:
     GameMap(QWidget* parent = nullptr);
     ~GameMap();
 
+    void setTestMap(const QVector<QVector<int>>& newMap) { mapType = newMap; }
+
+
     //ATTENTION :
     //parameter for getBoxType and setBoxType are [x,y]
     int getBoxTpyeNum(){    return boxType;}
@@ -23,6 +26,10 @@ public:
     int getColNum() const {return column;}
     int getRowNum() const {return row;}
     int getBufferNum() const {return buffer;}
+
+    void setColNum(int x)   {column = x ;}
+    void setRowNum(int x)   {row    = x ;}
+    void setBufferNum(int x){buffer = x ;}
 
     void setBoxType(int x, int y, int type) { mapType[y][x] = type; }
     QPoint getSelectPt(int index);
@@ -37,15 +44,11 @@ public:
 
 
 
-    void enablePaintPath(){paintPath = true;
-        qDebug()<<"enable paint path";}
-    void disablePaintPath(){paintPath = false;
-        qDebug()<<"disable paint path";}
+    void enablePaintPath(){paintPath = true;}
+    void disablePaintPath(){paintPath = false;}
 
-    void enablePaintHint(){paintHintPath = true;
-        qDebug()<<"enable paint hint";}
-    void disablePaintHint(){paintHintPath = false;
-        qDebug()<<"disable paint hint";}
+    void enablePaintHint(){paintHintPath = true;}
+    void disablePaintHint(){paintHintPath = false;}
 
     void clearSelected(int);
     void addSelected(QPoint);
@@ -63,12 +66,6 @@ public:
 
     void multiModeOn(){ multimode = true;}
     void multimodeOff(){multimode = false;}
-
-
-
-//public slots:
-    //void updatePlayerPosition(QPoint);
-
 
 
 signals:

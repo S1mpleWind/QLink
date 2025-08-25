@@ -4,8 +4,7 @@
 
 GameScreen::GameScreen(QWidget* parent)
     : QWidget(parent)
-    , gameMap(new GameMap(this)) // ← 这里改成 new 出来
-    , gameLogic(new GameLogic(gameMap))
+    , gameLogic(new GameLogic(this))
     , gameMenu(new GameMenu(this))
 {
 
@@ -49,7 +48,7 @@ GameScreen::GameScreen(QWidget* parent)
 
 
     mainLayout->addLayout(menuBar,0);  // 分数在顶部
-    mainLayout->addWidget(gameMap,1);            // 把地图控件加入布局
+    mainLayout->addWidget(gameLogic->getMap(),1);            // 把地图控件加入布局
 
     //gameLogic->updatePlayerPosition();
 
@@ -144,9 +143,9 @@ void GameScreen::keyPressEvent(QKeyEvent* event) {
     case Qt::Key_D: pos1.rx() += 1; break;
 
         // 玩家2 (↑↓←→)
-    case Qt::Key_I:    qDebug()<<"up"; pos2.ry() -= 1 ;  break;
-    case Qt::Key_K:  pos2.ry() += 1; break;
-    case Qt::Key_J:  pos2.rx() -= 1; break;
+    case Qt::Key_I: pos2.ry() -= 1 ;  break;
+    case Qt::Key_K: pos2.ry() += 1; break;
+    case Qt::Key_J: pos2.rx() -= 1; break;
     case Qt::Key_L: pos2.rx() += 1; break;
     }
 

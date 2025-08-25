@@ -8,8 +8,8 @@
 #include <QJsonArray>
 #include <QFile>
 
-GameLogic::GameLogic(GameMap * map)
-    :gameMap(map)
+GameLogic::GameLogic(QWidget* parent)
+    :gameMap(new GameMap())
     ,remainingTime(GAME_TIME)
     ,gameTimer(new QTimer(this))
     ,propTimer(new QTimer(this))
@@ -25,9 +25,8 @@ GameLogic::GameLogic(GameMap * map)
     propTimer->start(PROP_GENERATE_TIME);
 
 
-    bool checklink = connect(gameMap,&GameMap::checkCanLink,this,&GameLogic::canLink);
+    connect(gameMap,&GameMap::checkCanLink,this,&GameLogic::canLink);
     //bool drawline = connect(this,&GameLogic::drawLineSignal,gameMap,&GameMap::update);
-    qDebug() << "[DEBUG] connect result:" << checklink;
 
     //gamePlayer = new GamePlayer();
     initPlayer(1);
@@ -36,13 +35,10 @@ GameLogic::GameLogic(GameMap * map)
     if (gameMode == 1) {
         QPoint p2 = gamePlayer2->getPosition();
         gameMap->setBoxType(p2.x(), p2.y(), 0);  // 清掉P2位置
-        qDebug()<<p2<<gameMap->getBoxType(p2.x(), p2.y());
     }
 
     //initialize player position
     updatePlayerPosition(1,gamePlayer->getPosition());
-
-    //bool updatePlayer = connect(gamePlayer,&GamePlayer::positionChanged,gameMap,&GameMap::updatePlayerPosition);
 
     connect(gamePlayer,&GamePlayer::scoreChanged,this,&GameLogic::receiveScores);
 
@@ -133,20 +129,14 @@ void GameLogic::loadGame(const QString &filePath) {
     file.close();
 
     QJsonDocument doc = QJsonDocument::fromJson(data);
-
-
-
     QJsonObject root = doc.object();
 
-    // 读模式
     gameMode = root["mode"].toInt(1); // 默认单人
 
-    // 读时间
     remainingTime = root["remainingTime"].toInt(60); // 默认60秒
-    emit updateTime(remainingTime); // 通知 UI
+    emit updateTime(remainingTime);
 
-
-    // 1. 恢复地图
+    // 1.recover map
     QJsonArray mapArray = root["map"].toArray();
     for (int i = 0; i < mapArray.size(); ++i) {
         QJsonArray row = mapArray[i].toArray();
@@ -155,14 +145,13 @@ void GameLogic::loadGame(const QString &filePath) {
         }
     }
 
-    // 2. 恢复玩家1
+    // 2.recover player
     QJsonObject player1Obj = root["player1"].toObject();
     QPoint pos1(player1Obj["x"].toInt(), player1Obj["y"].toInt());
     gamePlayer->setPosition(pos1);
     gamePlayer->setScore(player1Obj["score"].toInt());
     emit updateScores(gamePlayer->getScore(),1);
 
-    // 3. 恢复玩家2（如果有）
     if (gameMode == 2 && root.contains("player2")) {
         QJsonObject player2Obj = root["player2"].toObject();
         QPoint pos2(player2Obj["x"].toInt(), player2Obj["y"].toInt());
@@ -171,7 +160,7 @@ void GameLogic::loadGame(const QString &filePath) {
         emit updateScores(gamePlayer2->getScore(),2);
     }
 
-    // 触发重绘
+    //repaint
     gameMap->update();
 }
 
@@ -254,7 +243,7 @@ void GameLogic::countTime()
     if(isPaused)return;
 
     remainingTime-=1;
-    //qDebug()<<"remaining time"<<remainingTime;
+
     emit updateTime(remainingTime);
 
     if(remainingTime == 0)
@@ -279,7 +268,6 @@ bool GameLogic :: delayClearSelect(int index)
 }
 
 
-//Most Important Function here
 
 bool GameLogic::canLink(QPoint pt1, QPoint pt2 , int index) {
     if (!gameMap) {
@@ -301,15 +289,13 @@ bool GameLogic::canLink(QPoint pt1, QPoint pt2 , int index) {
     }
 
 
-
-    // 清空路径，避免旧路径残留
     validPath.clear();
 
     if (canConnectStraight(pt1, pt2) ||
         canConnectOneTurn(pt1, pt2) ||
         canConnectTwoTurn(pt1, pt2)) {
 
-        //In detectmode , these functions will not be triggered
+        //In detectmode , these functions will not be triggered to paint path
         if(!detectMode)
         {
             gameMap->enablePaintPath();
@@ -344,8 +330,6 @@ bool GameLogic::canLink(QPoint pt1, QPoint pt2 , int index) {
                 gameMap->update();
             });
         }
-
-
         return true;
     }
 
@@ -354,17 +338,10 @@ bool GameLogic::canLink(QPoint pt1, QPoint pt2 , int index) {
 
 
 
-
-
-
-
-
-// Basic conditionsint
+// Basic conditions
 bool GameLogic::isEmptyTile(QPoint pt) {
     int x = pt.x() , y=pt.y();
     return gameMap->getBoxType(x,y) <= 0;
-
-    //ATTENTION : the 2-D array has a different direction compared with the coordinates
 }
 
 bool GameLogic::isClearRow(int row, int col1, int col2) {
@@ -503,20 +480,16 @@ void GameLogic::updatePlayerPosition(int index, QPoint newPos)
     int col = newPos.x();
     int row = newPos.y();
 
-
-
-
-    // 边界检查
+    // if it hit boundary , stay still
     if (row < 0 || row >= gameMap->getRowNum() + 2 * gameMap->getBufferNum() ||
         col < 0 || col >= gameMap->getColNum() + 2 * gameMap->getBufferNum()) {
         qDebug() << "Invalid move: out of bounds";
         return;
     }
 
-    // 检查格子内容
     int t = gameMap->getBoxType(col, row);
 \
-    if (t > 0) { // 碰到方块
+    if (t > 0) { // hit pair box
         if(index==1)
         {
             gameMap->addSelected(newPos);
@@ -529,7 +502,7 @@ void GameLogic::updatePlayerPosition(int index, QPoint newPos)
         }
     }
 
-    // 道具逻辑（只在单人模式生效）
+    // prop logic (only active in single mode)
     if (t < -2 && gameMode == 1) {
         switch (t) {
         case PROP_ADD_ONE:
@@ -568,11 +541,6 @@ void GameLogic::updatePlayerPosition(int index, QPoint newPos)
 
         gameMap->setBoxType(prevPos.x(), prevPos.y(), 0);   // 清空旧位置
         gameMap->setBoxType(newPos.x(), newPos.y(), -2);    // 玩家2标记
-
-        qDebug()<<gameMode;
-        qDebug()<<"player2 update";
-        qDebug()<<prevPos;
-        qDebug()<<newPos;
     }
 
     gameMap->update(); // 触发重绘
@@ -599,7 +567,7 @@ void GameLogic::updateEdgePts() {
                     gameMap->getBoxType(j, i-1) == 0) {
                     QPoint pt(j, i);
                     edgePts.push_back(pt);
-                    edgePtsByType[type].push_back(pt);  // 同时分类
+                    edgePtsByType[type].push_back(pt);
                 }
             }
         }
@@ -614,23 +582,13 @@ void GameLogic:: remainUnmatchedPairs()
     gameMap->disablePaintPath();
 
     for (auto &[type, pts] : edgePtsByType) {
-        if (pts.size() < 2) continue; // 不够配对，跳过
-
-
-
+        if (pts.size() < 2) continue; // no enough boxs left , skip
         // not trigger the remove function
-
         for (int i = 0; i < pts.size(); ++i) {
             for (int j = i + 1; j < pts.size(); ++j) {
-                //detectMode = true;
-                //gameMap->enablePaintPath();
                 // not trigger the remove function
                 if (canLink(pts[i], pts[j],1)) {
-
-                    //this step will couse extra "clr pts"
-
                     //In Detect mode , we record the possible path for the hint mode to call
-
                     hintPath.clear();
                     hintPath = validPath;
 
@@ -638,11 +596,7 @@ void GameLogic:: remainUnmatchedPairs()
                     hintPts.push_back(pts[i]);
                     hintPts.push_back(pts[j]);
 
-
-
                     detectMode = false ;
-                    qDebug()<<"remain unmatched pairs";
-                    //gameMap->enablePaintPath();
                     return; // 找到可消除的一对
                 }
             }
@@ -662,8 +616,6 @@ void GameLogic::showHint() {
         return;
     }
 
-    qDebug()<<hintPath;
-    qDebug()<<hintPts;
     gameMap->enablePaintHint();
     gameMap->setHintPath(hintPath);
     gameMap->update();
@@ -675,13 +627,6 @@ void GameLogic::showHint() {
     });
 }
 
-
-
-void GameLogic::setNormalMode()
-{
-    gameMap->enablePaintPath();
-}
-// boll GameLogic :: isBool （）
 
 
 void GameLogic::resetGamePara()
@@ -703,15 +648,13 @@ void GameLogic::resetGamePara()
 void GameLogic::resetGamePlayer()
 {
     gamePlayer->resetPlayer();
-    //updatePlayerPosition(1,QPoint(0,0));
-    //TODO: In single mode or mutiplayer
     gamePlayer2->resetPlayer();
 }
 
 void GameLogic::resetGame()
 {
     resetGamePara();
-    //resetGamePlayer();
+    resetGamePlayer();
     initPlayer(1);
     initPlayer(2);
     resumeGame();

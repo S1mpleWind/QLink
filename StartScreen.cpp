@@ -55,7 +55,7 @@ void StartScreen::changeMode()
         gameMode = 1;
     }
 
-    qDebug()<<"gamemode"<<gameMode;
+    //qDebug()<<"gamemode"<<gameMode;
     emit switchmode(gameMode);
 }
 

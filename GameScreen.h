@@ -39,7 +39,7 @@ public slots:
 
 
 private:
-    GameMap* gameMap;
+    //GameMap* gameMap;
     GameLogic* gameLogic;
     GameMenu* gameMenu;
 
