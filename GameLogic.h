@@ -13,12 +13,16 @@ class GameLogic : public QWidget
     Q_OBJECT
 
 public:
-    GameLogic(GameMap* map = nullptr);
+    GameLogic(QWidget * parent = nullptr);
     ~GameLogic();
 
 //获取player信息的接口
     QPoint getPlayerPosition(int);
     GamePlayer* getPlayer(int);
+
+    GameMap * getMap() {
+        return gameMap;
+    }
     //TODO : use index in multiplayer mode
     /*
     void movePlayerUp();
@@ -45,8 +49,11 @@ public:
 
     int getMode(){return gameMode;}
 
-protected:    //judge a legal link
     bool canLink(QPoint pt_1,QPoint pt_2 ,int index);
+
+
+protected:    //judge a legal link
+
 
     bool isEmptyTile(QPoint);
     bool isClearRow(int row , int col_1 , int col_2);
@@ -108,7 +115,6 @@ private:
 
 
 public slots:
-    void setNormalMode();
     void receiveScores(int);
     void countTime();
 

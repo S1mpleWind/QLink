@@ -4,6 +4,7 @@
 #include <QMouseEvent>
 #include <QDebug>
 #include <QRandomGenerator>
+#include <algorithm>   // for std::shuffle
 
 
 GameMap::GameMap (QWidget* parent)
@@ -41,23 +42,7 @@ void GameMap::initMap()
         for (int j = buffer ; j <= column + buffer - 1; ++j) {
             mapType[i][j] = ((i+j+std::rand())) % boxType + 1;
         }
-
-    //TODO: the props?
 }
-
-
-// void GameMap::updatePlayerPosition(QPoint p)
-// {
-//     int playerCol = p.x();
-//     int playerRow = p.y();
-//     if (mapType[playerRow][playerCol]>0)
-//     {
-
-//     }
-
-//     mapType[playerRow][playerCol]=-1;
-// }
-
 
 
 void GameMap::paintEvent(QPaintEvent *)
@@ -89,11 +74,6 @@ void GameMap::paintEvent(QPaintEvent *)
     drawMap(&painter); //画地图
     highlightSelectedPt(&painter);
 
-    //TODO: 怎么把路径传给map
-
-    //qDebug()<<linkPath.isEmpty();
-    //qDebug()<<paintPath;
-    //画路径
     drawLinkPath(&painter);
 
     drawHintPath(&painter);
@@ -104,7 +84,7 @@ void GameMap::drawLinkPath(QPainter* painter) const
 {
 
     if (!linkPath.isEmpty()&&paintPath) {
-        qDebug()<<"painting path";
+        //qDebug()<<"painting path";
         painter->setPen(QPen(Qt::red, 0.1));
         auto center = [](QPoint pt) -> QPointF {
             return QPointF(pt.x() + 0.5, pt.y() + 0.5);
@@ -120,7 +100,7 @@ void GameMap::drawLinkPath(QPainter* painter) const
 void GameMap::drawHintPath(QPainter* painter) const
 {
     if (!hintPath.isEmpty()&&paintHintPath) {
-        qDebug()<<"painting hint path";
+        //qDebug()<<"painting hint path";
         painter->setPen(QPen(Qt::red, 0.1));
         auto center = [](QPoint pt) -> QPointF {
             return QPointF(pt.x() + 0.5, pt.y() + 0.5);
@@ -149,7 +129,7 @@ void GameMap::drawMap(QPainter *painter) const
             {
                 if (multimode)
                 {
-                    qDebug()<<"drawplayer 2";
+                    //qDebug()<<"drawplayer 2";
                     drawPlayer2(painter,j,i);
                 }
 
@@ -162,7 +142,7 @@ void GameMap::drawMap(QPainter *painter) const
             else if (mapType[i][j] == -1)
             {
                 //in case sth unexpected happens
-                qDebug()<<"drawplayer 1";
+                //qDebug()<<"drawplayer 1";
                 drawPlayer(painter,j,i);
             }
             else if(mapType[i][j]>0){
@@ -326,7 +306,7 @@ void GameMap::drawProp(QPainter * painter,int x,int y , int t) const
 
 void GameMap::addSelected(QPoint pt)
 {
-    qDebug()<<"the selected pt is"<<pt;
+    //qDebug()<<"the selected pt is"<<pt;
     selectedPts.push_back(pt);
     update();
     //更新绘制
@@ -340,16 +320,14 @@ void GameMap::addSelected(QPoint pt)
 
 void GameMap::addSelected2(QPoint pt)
 {
-    qDebug()<<"the selected pt is"<<pt;
+    //qDebug()<<"the selected pt is"<<pt;
     selectedPts2.push_back(pt);
     update();
-    //更新绘制
 
     if (selectedPts2.length()==2)
     {
         emit checkCanLink(selectedPts2[0],selectedPts2[1],2);
     }
-    //qDebug()<<selectedPts.length();
 }
 
 
@@ -395,7 +373,7 @@ void GameMap::mousePressEvent(QMouseEvent* event) {
             emit flashPosition(1,clicked);
         }
 
-        if(mapType[row][col]>0)
+        if(mapType[row][col] > 0)
         {
             QPoint flashPoint = surroundBuffer(clicked);
             if (flashPoint != clicked)
@@ -451,7 +429,6 @@ QPoint GameMap::surroundBuffer(QPoint pt)
 void GameMap::clearSelected(int index) {
     if(index == 1)selectedPts.clear();
     else selectedPts2.clear();
-    qDebug()<<"clr pts";
     update();
 }
 
@@ -465,8 +442,7 @@ QPoint GameMap::getSelectPt(int index){
 }
 
 
-#include <QRandomGenerator>
-#include <algorithm>   // for std::shuffle
+
 
 void GameMap::shuffleMap()
 {

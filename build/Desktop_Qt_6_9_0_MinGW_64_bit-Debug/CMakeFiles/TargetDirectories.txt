@@ -1,4 +1,6 @@
 D:/FILES_N_Data/GUI_file/QLink/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/CMakeFiles/QLink.dir
+D:/FILES_N_Data/GUI_file/QLink/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/CMakeFiles/TestGameLogic.dir
+D:/FILES_N_Data/GUI_file/QLink/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/CMakeFiles/test.dir
 D:/FILES_N_Data/GUI_file/QLink/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/CMakeFiles/edit_cache.dir
 D:/FILES_N_Data/GUI_file/QLink/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/CMakeFiles/rebuild_cache.dir
 D:/FILES_N_Data/GUI_file/QLink/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/CMakeFiles/list_install_components.dir
@@ -7,3 +9,5 @@ D:/FILES_N_Data/GUI_file/QLink/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/CMakeFi
 D:/FILES_N_Data/GUI_file/QLink/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/CMakeFiles/install/strip.dir
 D:/FILES_N_Data/GUI_file/QLink/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/CMakeFiles/QLink_autogen_timestamp_deps.dir
 D:/FILES_N_Data/GUI_file/QLink/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/CMakeFiles/QLink_autogen.dir
+D:/FILES_N_Data/GUI_file/QLink/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/CMakeFiles/TestGameLogic_autogen_timestamp_deps.dir
+D:/FILES_N_Data/GUI_file/QLink/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/CMakeFiles/TestGameLogic_autogen.dir

@@ -1,0 +1,106 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-33e02e7b0092b55daa3e.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.16"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "QLink",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "QLink::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-QLink-Debug-2d723a7357b410c884be.json",
+					"name" : "QLink",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "QLink_autogen::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-QLink_autogen-Debug-7464cfa7d16fbff95de0.json",
+					"name" : "QLink_autogen",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "QLink_autogen_timestamp_deps::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-QLink_autogen_timestamp_deps-Debug-302aeaa1af44d5f1cca3.json",
+					"name" : "QLink_autogen_timestamp_deps",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "TestGameLogic::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-TestGameLogic-Debug-5749cefadd298e24d167.json",
+					"name" : "TestGameLogic",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "TestGameLogic_autogen::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-TestGameLogic_autogen-Debug-c4a0e7efa544fee38710.json",
+					"name" : "TestGameLogic_autogen",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "TestGameLogic_autogen_timestamp_deps::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-TestGameLogic_autogen_timestamp_deps-Debug-141c4f2e632b71523b35.json",
+					"name" : "TestGameLogic_autogen_timestamp_deps",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "D:/FILES_N_Data/GUI_file/QLink/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug",
+		"source" : "D:/FILES_N_Data/GUI_file/QLink"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 7
+	}
+}
