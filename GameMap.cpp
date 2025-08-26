@@ -11,6 +11,10 @@ GameMap::GameMap (QWidget* parent)
 {
     srand((int)time(0));
 
+    setBufferNum(BUFFER_NUM);
+    setColNum(COL_NUM);
+    setRowNum(ROW_NUM);
+
     initMap();
 
     //connect(GamePlayer,)
@@ -307,7 +311,7 @@ void GameMap::drawProp(QPainter * painter,int x,int y , int t) const
 void GameMap::addSelected(QPoint pt)
 {
     //qDebug()<<"the selected pt is"<<pt;
-    selectedPts.push_back(pt);
+    if(selectedPts.length()<=1) selectedPts.push_back(pt);
     update();
     //更新绘制
 
@@ -316,6 +320,7 @@ void GameMap::addSelected(QPoint pt)
         emit checkCanLink(selectedPts[0],selectedPts[1],1);
     }
    //qDebug()<<selectedPts.length();
+
 }
 
 void GameMap::addSelected2(QPoint pt)
@@ -482,8 +487,12 @@ void GameMap::shuffleMap()
 
 
 
-
-
+void GameMap::resetMap()
+{
+    initMap();
+    linkPath.clear();
+    hintPath.clear();
+}
 
 
 

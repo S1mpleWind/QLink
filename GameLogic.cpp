@@ -4,8 +4,10 @@
 #include <QDebug>
 #include <QRandomGenerator>
 
+#include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QJsonValue>
 #include <QFile>
 
 GameLogic::GameLogic(QWidget* parent)
@@ -47,6 +49,14 @@ GameLogic::GameLogic(QWidget* parent)
 
     //initial for hint
     updateEdgePts();
+
+    hintTimer = new QTimer(this);
+    hintTimer->setSingleShot(true);
+    connect(hintTimer, &QTimer::timeout, this, [=]() {
+        gameMap->disablePaintHint();
+        gameMap->update();
+        hintActive = false;
+    });
 }
 
 
@@ -453,6 +463,7 @@ void GameLogic::remove(QPoint pt_1 , QPoint pt_2)
         hintPts.clear();
         hintPath.clear();
         gameMap->disablePaintHint();
+        if (hintActive) showHint();
     }
 
     updateEdgePts();
@@ -514,11 +525,14 @@ void GameLogic::updatePlayerPosition(int index, QPoint newPos)
             QTimer::singleShot(FLASH_TIME, gameMap, &GameMap::flashModeOff);
             break;
         case PROP_HINT:
+            hintTimer->start(HINT_TIME);
+            hintActive = true ;
             showHint();
             break;
         case PROP_SHUFFLE:
             gameMap->shuffleMap();
             updateEdgePts();
+            showHint();
             break;
         default:
             qDebug() << "error when hitting props";
@@ -620,12 +634,9 @@ void GameLogic::showHint() {
     gameMap->setHintPath(hintPath);
     gameMap->update();
 
-    //TODO:
-    QTimer::singleShot(10000, this, [=]() {
-        gameMap->disablePaintHint();
-        gameMap->update();
-    });
+    hintActive = true;
 }
+
 
 
 

@@ -55,7 +55,7 @@ public:
     void addSelected2(QPoint);
 
 
-    void resetMap(){initMap();}
+    void resetMap();
 
     void flashModeON(){ flashMode = true ; }
     void flashModeOff(){flashMode = false; }

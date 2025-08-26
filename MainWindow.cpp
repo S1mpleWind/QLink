@@ -1,5 +1,8 @@
 #include "MainWindow.h"
 #include "./ui_MainWindow.h"
+#include <QFile>
+#include <QDialog>
+#include <QTextBrowser>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -20,9 +23,12 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(startScreen->getReadButton(),&QPushButton::clicked, this, &MainWindow::loadGame);
 
+    connect(startScreen->getHelperButton(),&QPushButton::clicked, this, &MainWindow::openHelpDoc);
+
     connect(gameScreen,&GameScreen::goBackToStartScreen,this,&MainWindow::showStartScreen);
 
     connect(startScreen,&StartScreen::switchmode,gameScreen,&GameScreen::setMode);
+
 
 
 
@@ -77,3 +83,30 @@ void MainWindow::initMainWindow()
     setWindowTitle("Don't Starve Link");
     resize(1400, 1000);
 }
+
+
+void MainWindow::openHelpDoc()
+{
+
+    QFile file(":/instruct/instructor.md");
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        return;
+
+    QString content = file.readAll();
+
+
+    QDialog *dialog = new QDialog(this);
+    dialog->setWindowTitle("Markdown Viewer");
+    dialog->resize(600, 400);
+
+    QTextBrowser *browser = new QTextBrowser(dialog);
+    browser->setMarkdown(content);   // <-- Markdown 预览
+    browser->setReadOnly(true);
+
+    QVBoxLayout *layout = new QVBoxLayout(dialog);
+    layout->addWidget(browser);
+    dialog->setLayout(layout);
+
+    dialog->exec(); // 模态窗口，点击关闭按钮即可退出
+}
+

@@ -9,6 +9,12 @@ extern int ADD_TIME ;
 
 extern int FLASH_TIME ;
 
+extern int HINT_TIME;
+
+extern int BUFFER_NUM ;
+extern int COL_NUM;
+extern int ROW_NUM;
+
 enum CellType {
     PROP_ADD_ONE = -5,
     PROP_SHUFFLE = -6,

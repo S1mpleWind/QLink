@@ -21,6 +21,8 @@ public:
     void showStartScreen();
     void showGameScreen();
 
+
+
     void initMainWindow();
 
 private:
@@ -32,7 +34,7 @@ private:
 
 private slots:
     void loadGame();
-
+    void openHelpDoc();
 
 
 

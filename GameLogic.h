@@ -100,6 +100,9 @@ private:
 
     QTimer* propTimer;
 
+    QTimer* hintTimer;
+    bool hintActive = false ;
+
 
     //control logic
     bool isPaused;
