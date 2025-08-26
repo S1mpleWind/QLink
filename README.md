@@ -4,6 +4,8 @@
 
 SJTU_SEP_PROJECT
 
+本游戏静态编译的.exe文件已放在release中 欢迎体验
+
 ---
 
 # 特别鸣谢
