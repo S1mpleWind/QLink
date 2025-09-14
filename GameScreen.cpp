@@ -12,11 +12,61 @@ GameScreen::GameScreen(QWidget* parent)
     backgroundIndex = std::rand()%6;
 
 
-    //preset
+    //默认为暂停，游戏开始时自动恢复
     gameLogic->pauseGame();
 
 
+    //初始化label并假如到菜单栏的水平布局中
+    setupLabel();
 
+    QHBoxLayout* menuBar = new QHBoxLayout();
+    menuBar->addWidget(scoreLabel1);
+    menuBar->addWidget(timeLabel);
+
+
+    // 创建主布局
+    QVBoxLayout* mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(0, 0, 0, 0); // 可选：无边距
+
+
+    mainLayout->addLayout(menuBar,0);  // 分数在顶部
+    mainLayout->addWidget(gameLogic->getMap(),1);            // 把地图控件加入布局
+
+
+
+    setLayout(mainLayout);
+    // 设置布局到 GameScreen 上
+
+
+    // 初始隐藏菜单
+    gameMenu->hide();
+    gameMenu->raise();  // 保证覆盖在最上层
+    gameMenu->resize(size());
+
+
+
+//按钮的信号与槽的连接
+    connect(gameMenu, &GameMenu::resumeClicked, this, &GameScreen::resumeGame);
+    connect(gameMenu, &GameMenu::restartClicked, this, &GameScreen::restartGame);
+    connect(gameMenu, &GameMenu::exitClicked, this, &GameScreen::exitGame);
+    connect(gameMenu, &GameMenu::fileClicked,this,&GameScreen::saveGame);
+
+
+//更新菜单栏的连接
+    connect(gameLogic,&GameLogic::updateTime,this,&GameScreen::updateTimeDisplay);
+    connect(gameLogic,&GameLogic::updateScores,this,&GameScreen::updateScoreDisplay);
+
+
+//时间结束或没有剩余可以连接的方块时，结束游戏
+    connect(gameLogic,&GameLogic::timeIsUp,this,&GameScreen::onGameOver);
+    connect(gameLogic,&GameLogic::noMoreValidPairs,this,&GameScreen::onGameOver);
+
+
+}
+
+
+void GameScreen::setupLabel()
+{
     //UI
     scoreLabel1 = new QLabel(this);
     scoreLabel1->setText(QString("Score: %1").arg(displayScore));
@@ -35,52 +85,8 @@ GameScreen::GameScreen(QWidget* parent)
     timeLabel->setAlignment(Qt::AlignCenter);
     timeLabel->setStyleSheet("font: bold 16px; color: white;"); // 可根据需要美化
     timeLabel->setFixedHeight(40);
-
-    QHBoxLayout* menuBar = new QHBoxLayout();
-    menuBar->addWidget(scoreLabel1);
-    menuBar->addWidget(timeLabel);
-
-    // 创建一个布局
-    QVBoxLayout* mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(0, 0, 0, 0); // 可选：无边距
-
-
-
-
-    mainLayout->addLayout(menuBar,0);  // 分数在顶部
-    mainLayout->addWidget(gameLogic->getMap(),1);            // 把地图控件加入布局
-
-    //gameLogic->updatePlayerPosition();
-
-    setLayout(mainLayout); // 设置布局到 GameScreen 上
-
-
-    // 初始隐藏菜单
-    gameMenu->hide();
-    gameMenu->raise();  // 保证覆盖在最上层
-    gameMenu->resize(size());
-
-    connect(gameMenu, &GameMenu::resumeClicked, this, &GameScreen::resumeGame);
-    connect(gameMenu, &GameMenu::restartClicked, this, &GameScreen::restartGame);
-    connect(gameMenu, &GameMenu::exitClicked, this, &GameScreen::exitGame);
-    connect(gameMenu, &GameMenu::fileClicked,this,&GameScreen::saveGame);
-
-
-
-
-    connect(gameLogic, &GameLogic::noMoreValidPairs,this,&GameScreen::pauseGame);
-
-    connect(gameLogic,&GameLogic::updateTime,this,&GameScreen::updateTimeDisplay);
-    connect(gameLogic,&GameLogic::updateScores,this,&GameScreen::updateScoreDisplay);
-
-
-    connect(gameLogic,&GameLogic::timeIsUp,this,&GameScreen::onGameOver);
-    connect(gameLogic,&GameLogic::noMoreValidPairs,this,&GameScreen::onGameOver);
-
-
-
-
 }
+
 
 GameScreen:: ~GameScreen()
 {
@@ -88,6 +94,7 @@ GameScreen:: ~GameScreen()
 }
 
 
+//更改游戏状态
 void GameScreen::setPause()
 {
     gameLogic->pauseGame();
@@ -107,6 +114,7 @@ void GameScreen::resizeEvent(QResizeEvent* e) {
 }
 
 
+//更新menubar的分数和时间显示
 void GameScreen::updateScoreDisplay(int s, int index)
 {
     if (index == 1) {
@@ -123,6 +131,7 @@ void GameScreen::updateTimeDisplay(int t)
 }
 
 
+// 处理按键事件
 void GameScreen::keyPressEvent(QKeyEvent* event) {
 
     if (event->key() == Qt::Key_Escape) {
@@ -152,6 +161,8 @@ void GameScreen::keyPressEvent(QKeyEvent* event) {
     gameLogic->updatePlayerPosition(1, pos1);
 
     gameLogic->updatePlayerPosition(2, pos2);
+
+    //触发重新绘制
     update();
 }
 

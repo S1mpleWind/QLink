@@ -6,6 +6,10 @@
 #include <QRandomGenerator>
 #include <algorithm>   // for std::shuffle
 
+/*
+    GameMap类主要负责各种的绘制事件
+*/
+
 
 GameMap::GameMap (QWidget* parent)
 {
@@ -16,9 +20,6 @@ GameMap::GameMap (QWidget* parent)
     setRowNum(ROW_NUM);
 
     initMap();
-
-    //connect(GamePlayer,)
-    //connect used in gamelogic
 }
 
 GameMap:: ~GameMap()
@@ -35,13 +36,14 @@ void GameMap::initMap()
     for (int i = 0; i < totalRows; ++i) {
         mapType[i].resize(totalCols);  // 每一行设置列数
     }
-    //use 2 loops to initialize the map
+
+    // 用循环初始化数组
     for (int i = 0; i <= row + 2 * buffer - 1 ; ++i)
         for (int j = 0; j <= column + 2 * buffer - 1; ++j) {
             mapType[i][j] = 0;
         }
 
-    // fill every square in the map with a random box
+    // 用随机数填入地图中的方块区域
     for (int i = buffer; i <= row + buffer-1 ; ++i)
         for (int j = buffer ; j <= column + buffer - 1; ++j) {
             mapType[i][j] = ((i+j+std::rand())) % boxType + 1;
@@ -51,7 +53,6 @@ void GameMap::initMap()
 
 void GameMap::paintEvent(QPaintEvent *)
 {
-    //qDebug()<<"paintevent called";
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing,true);
 
@@ -72,17 +73,22 @@ void GameMap::paintEvent(QPaintEvent *)
     heiSpace = row / std::min(row, column);
     widSpace = column / std::min(column, row);
     painter.setWindow(-widSpace, -heiSpace, totalCols+2*widSpace, totalRows+2*heiSpace);
-    //Sets the painter's window to the rectangle beginning at (x, y) and the given width and height.
 
 
-    drawMap(&painter); //画地图
+    //绘制地图
+    drawMap(&painter);
+
+    //绘制选中边框特效
     highlightSelectedPt(&painter);
 
+    //绘制连接的路径
     drawLinkPath(&painter);
 
+    //绘制提示路径
     drawHintPath(&painter);
 
 }
+
 
 void GameMap::drawLinkPath(QPainter* painter) const
 {
@@ -120,38 +126,45 @@ void GameMap::drawMap(QPainter *painter) const
 {
     painter->setPen(Qt::NoPen);
 
-    //no need to draw border
+    //挨个格子绘制地图
     for (int i = 0; i <= row + 2 * buffer - 1 ; ++i)
         for (int j = 0; j <= column + 2*buffer - 1; ++j) {
+
+            //“0”代表空格
             if (mapType[i][j] == 0)
             {
                 drawBufferBox(painter , j , i);
             }
 
-            //in multimode draw player 2
+            //“-2”是玩家2
             else if (mapType[i][j] == -2)
             {
+                //处在多人模式中触发绘制，否则当作空格处理
                 if (multimode)
                 {
-                    //qDebug()<<"drawplayer 2";
                     drawPlayer2(painter,j,i);
                 }
 
                 else {
                     drawBufferBox(painter , j , i);
-                    //setBoxType(j,i,0);
                 }
             }
 
+
+            //“-1”代表玩家1
             else if (mapType[i][j] == -1)
             {
-                //in case sth unexpected happens
-                //qDebug()<<"drawplayer 1";
                 drawPlayer(painter,j,i);
             }
+
+
+            //大于0的都是要消除的格子
             else if(mapType[i][j]>0){
                 drawPairBox(painter,j,i);
             }
+
+
+            //其他的负数都是道具格子
             else
             {
                 drawProp(painter,j,i,mapType[i][j]);
@@ -159,13 +172,17 @@ void GameMap::drawMap(QPainter *painter) const
         }
 }
 
+
+//绘制高亮格子的注释
 void GameMap::highlightSelectedPt(QPainter* painter) const
 {
+    //没有选中的格子，退出
     if (selectedPts.empty()&&selectedPts2.empty())
     {
         return;
     }
 
+    //设置笔刷格式
     painter->setPen(QPen(Qt::yellow, 0.1));
     painter->setBrush(Qt::NoBrush);
 
@@ -173,24 +190,28 @@ void GameMap::highlightSelectedPt(QPainter* painter) const
         painter->drawRect(QRectF(pt.x(), pt.y(), 1, 1));  // 给选中方块画黄色边框
     }
 
+
+    //多人模式下，使用另一种颜色绘制选中的方块，避免混淆
     if(multimode)
     {
         painter->setPen(QPen(Qt::green, 0.1));
         painter->setBrush(Qt::NoBrush);
 
         for (const QPoint& pt : selectedPts2) {
-            painter->drawRect(QRectF(pt.x(), pt.y(), 1, 1));  // 给选中方块画黄色边框
+            painter->drawRect(QRectF(pt.x(), pt.y(), 1, 1));  // 给选中方块画绿色边框
         }
     }
 
 }
 
+
+//绘制空白格子
 void GameMap::drawBufferBox(QPainter* painter, int j , int i) const
 {
     QPixmap boxImg(boxImgUrl[0]);
     painter->drawPixmap(j,i,1,1,boxImg);
 
-    //3.画边框
+    //画边框
     QPen gridPen(QColor(10,10,10,100));
     gridPen.setWidthF(0.01);
     painter->setPen(gridPen);
@@ -200,6 +221,7 @@ void GameMap::drawBufferBox(QPainter* painter, int j , int i) const
 }
 
 
+//绘制要消除的格子
 void GameMap ::drawPairBox(QPainter* painter,int j,int i) const
 {
     int type = mapType[i][j];
@@ -251,6 +273,8 @@ void GameMap ::drawPairBox(QPainter* painter,int j,int i) const
 }
 
 
+
+//绘制两个玩家的函数
 void GameMap::drawPlayer(QPainter* painter ,int x,int y) const
 {
     painter->setBrush(Qt::blue);
@@ -267,8 +291,10 @@ void GameMap::drawPlayer2(QPainter* painter ,int x,int y) const
 }
 
 
+//绘制道具格子
 void GameMap::drawProp(QPainter * painter,int x,int y , int t) const
 {
+    //根据道具类型，选择对应的图像进行绘制
     switch(t)
     {
         case PROP_ADD_ONE:
@@ -307,7 +333,7 @@ void GameMap::drawProp(QPainter * painter,int x,int y , int t) const
 
 
 
-
+//添加玩家一的选中方格
 void GameMap::addSelected(QPoint pt)
 {
     //qDebug()<<"the selected pt is"<<pt;
@@ -323,6 +349,8 @@ void GameMap::addSelected(QPoint pt)
 
 }
 
+
+//添加玩家2额选中方格
 void GameMap::addSelected2(QPoint pt)
 {
     //qDebug()<<"the selected pt is"<<pt;
@@ -340,7 +368,7 @@ void GameMap::addSelected2(QPoint pt)
 
 
 
-
+//在flash mode下，使用鼠标可以移动玩家
 void GameMap::mousePressEvent(QMouseEvent* event) {
     if(!flashMode) return;
 
@@ -373,14 +401,20 @@ void GameMap::mousePressEvent(QMouseEvent* event) {
     if (col >= 0 && col < totalCols && row >= 0 && row < totalRows) {
         QPoint clicked(col, row);
 
+        //如果点击的是空地或者道具，直接移过去
         if(mapType[row][col]<=0)
         {
             emit flashPosition(1,clicked);
         }
 
+        //如果点击的是格子
         if(mapType[row][col] > 0)
         {
+            //surroundbuffer随机返回指定格子周围的一个空格
+            //如果周围没有空格，则返回指定格子本身
             QPoint flashPoint = surroundBuffer(clicked);
+
+            //有空格的情况：
             if (flashPoint != clicked)
             {
                 emit flashPosition(1,flashPoint);
@@ -392,8 +426,13 @@ void GameMap::mousePressEvent(QMouseEvent* event) {
 }
 
 
+
+
+//surroundbuffer随机返回指定格子周围的一个空格
+//如果周围没有空格，则返回指定格子本身
 QPoint GameMap::surroundBuffer(QPoint pt)
 {
+    //用vector存储所有的候选格子
     QVector<QPoint> candidate;
     int x = pt.x();
     int y = pt.y();
@@ -418,12 +457,13 @@ QPoint GameMap::surroundBuffer(QPoint pt)
         candidate.push_back(QPoint(x + 1, y));
     }
 
-    // if no available position, return original
+
+    //如果周围没有空格，则返回指定格子本身
     if (candidate.isEmpty()) {
         return pt;
     }
 
-    // pick random one
+    //如果周围有空格，随机返回其中的一个
     int idx = QRandomGenerator::global()->bounded(candidate.size());
     return candidate[idx];
 }
@@ -486,7 +526,7 @@ void GameMap::shuffleMap()
 }
 
 
-
+//重置地图
 void GameMap::resetMap()
 {
     initMap();

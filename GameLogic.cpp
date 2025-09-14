@@ -15,51 +15,60 @@ GameLogic::GameLogic(QWidget* parent)
     ,remainingTime(GAME_TIME)
     ,gameTimer(new QTimer(this))
     ,propTimer(new QTimer(this))
+    ,hintTimer(new QTimer(this))
 
 {
 
-    //connect(gameMap,&GameMap::,this,&GameLogic::setNormalMode);
+// 连接几个计时器
+    //游戏时间
     connect(gameTimer,&QTimer::timeout,this,&GameLogic::countTime);
     gameTimer->start(1000);
 
-
+    //道具刷新时间
     connect(propTimer,&QTimer::timeout,this,&GameLogic::generateRandomProp);
     propTimer->start(PROP_GENERATE_TIME);
 
-
-    connect(gameMap,&GameMap::checkCanLink,this,&GameLogic::canLink);
-    //bool drawline = connect(this,&GameLogic::drawLineSignal,gameMap,&GameMap::update);
-
-    //gamePlayer = new GamePlayer();
-    initPlayer(1);
-    initPlayer(2);
-
-    if (gameMode == 1) {
-        QPoint p2 = gamePlayer2->getPosition();
-        gameMap->setBoxType(p2.x(), p2.y(), 0);  // 清掉P2位置
-    }
-
-    //initialize player position
-    updatePlayerPosition(1,gamePlayer->getPosition());
-
-    connect(gamePlayer,&GamePlayer::scoreChanged,this,&GameLogic::receiveScores);
-
-    connect(gameMap,&GameMap::flashPosition,this,&GameLogic::updatePlayerPosition);
-
-
-    //initial for hint
-    updateEdgePts();
-
-    hintTimer = new QTimer(this);
+    //提示持续时间
     hintTimer->setSingleShot(true);
     connect(hintTimer, &QTimer::timeout, this, [=]() {
         gameMap->disablePaintHint();
         gameMap->update();
         hintActive = false;
     });
+
+
+    connect(gameMap,&GameMap::checkCanLink,this,&GameLogic::canLink);
+
+
+//初始化两个player
+    initPlayer(1);
+    initPlayer(2);
+
+    //单人模式下，将 map 里储存的 player2 抹去
+    if (gameMode == 1) {
+        QPoint p2 = gamePlayer2->getPosition();
+        gameMap->setBoxType(p2.x(), p2.y(), 0);  // 清掉P2位置
+    }
+
+
+    //connect(gamePlayer,&GamePlayer::scoreChanged,this,&GameLogic::receiveScores);
+
+    connect(gameMap,&GameMap::flashPosition,this,&GameLogic::updatePlayerPosition);
+
+
+    //初始化边缘方块的存储，同时初始化一对hint
+    updateEdgePts();
 }
 
 
+GameLogic::~GameLogic()
+{
+    delete gamePlayer;
+    delete gamePlayer2;
+}
+
+
+//设置模式
 void GameLogic :: setGameMode(int a){
     gameMode = a;
     if (a==2)
@@ -73,18 +82,16 @@ void GameLogic :: setGameMode(int a){
     else gameMap->multimodeOff();
 }
 
-GameLogic::~GameLogic()
-{
-    delete gamePlayer;
-    delete gamePlayer2;
-}
 
+//获取玩家分数
 int GameLogic::getScore(int index) {
     if (index == 1) return gamePlayer->getScore();
     if (index == 2) return gamePlayer2->getScore();
     return 0;
 }
 
+
+//将游戏信息存储为JSON格式
 void GameLogic::saveGame(const QString &filePath) {
     QJsonObject root;
     root["mode"] = gameMode;  // 1=单人, 2=双人
@@ -180,11 +187,12 @@ void GameLogic::generateRandomProp()
 {
     if(isPaused) return ;
 
-    //TODO
+    //现阶段没写双人模式下的道具，故先禁用
     if(gameMode == 2) return;
 
     QPoint pos = getRandomBufferCell();
 
+    //在道具的几个序号中生成
     int t = QRandomGenerator::global()->bounded(-8, -4);
 
     gameMap->setBoxType(pos.x(),pos.y(),t);
@@ -192,13 +200,17 @@ void GameLogic::generateRandomProp()
 }
 
 
+//初始化指定的玩家
 void GameLogic::initPlayer(int index)
 {
     if(index==1)
     {
+        //初始化一个玩家，生成并更新它的位置
         gamePlayer = new GamePlayer();
         QPoint initPos = getRandomBufferCell();
         gamePlayer->setPosition(initPos);
+
+        //将玩家的位置信息录入地图中
         int x = initPos.x(), y = initPos.y();
         gameMap->setBoxType(x,y,-1);
     }
@@ -213,11 +225,15 @@ void GameLogic::initPlayer(int index)
     }
 }
 
+
+//获取玩家的接口
 GamePlayer* GameLogic::getPlayer(int index)
 {
     return index==0?gamePlayer:gamePlayer2;
 }
 
+
+//根据地图。寻找空白的格子
 QPoint GameLogic::getRandomBufferCell()
 {
     std::vector<QPoint> candidates;
@@ -248,6 +264,7 @@ QPoint GameLogic::getRandomBufferCell()
 }
 
 
+//用于维护游戏时间的函数
 void GameLogic::countTime()
 {
     if(isPaused)return;
@@ -263,11 +280,6 @@ void GameLogic::countTime()
 }
 
 
-void GameLogic:: receiveScores(int s)
-{
-
-    emit updateScores(s,1);
-}
 
 bool GameLogic :: delayClearSelect(int index)
 {
