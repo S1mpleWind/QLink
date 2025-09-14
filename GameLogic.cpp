@@ -280,7 +280,7 @@ void GameLogic::countTime()
 }
 
 
-
+// 延迟清除 ， 在视觉中暂留一会
 bool GameLogic :: delayClearSelect(int index)
 {
     QTimer::singleShot(500, gameMap, [index,this]() {
@@ -291,18 +291,21 @@ bool GameLogic :: delayClearSelect(int index)
 
 
 
+//最重要的函数
+//判断给定序号的player是否能连接，并且连接了其他一些功能的函数
 bool GameLogic::canLink(QPoint pt1, QPoint pt2 , int index) {
     if (!gameMap) {
         qDebug() << "GameMap not created successfully!";
         return false;
     }
 
-    //Basic conditions
+    // 重合的点
     if (pt1 == pt2)
     {
         return delayClearSelect(index);
     }
 
+    //类型不一样的点
     int type1 = gameMap->getBoxType(pt1.x(), pt1.y());
     int type2 = gameMap->getBoxType(pt2.x(), pt2.y());
     if (type1 == 0 || type2 == 0 || type1 != type2)
@@ -310,19 +313,21 @@ bool GameLogic::canLink(QPoint pt1, QPoint pt2 , int index) {
         return delayClearSelect(index);
     }
 
-
+    //清空，为存储下一次可能要绘制的路径做准备
     validPath.clear();
 
     if (canConnectStraight(pt1, pt2) ||
         canConnectOneTurn(pt1, pt2) ||
         canConnectTwoTurn(pt1, pt2)) {
 
-        //In detectmode , these functions will not be triggered to paint path
+        // 在正常模式中，触发绘制
+        // 在探测模式中，不触发绘制
         if(!detectMode)
         {
             gameMap->enablePaintPath();
             gameMap->setLinkPath(validPath);
 
+            //根据调用的序号 ， 更新对应的玩家的分数
             if(index == 1)
             {
                 gamePlayer->addFixedScore();
@@ -337,15 +342,18 @@ bool GameLogic::canLink(QPoint pt1, QPoint pt2 , int index) {
             gameMap->update();
 
 
+            //移去匹配的方块
             QTimer::singleShot(500, this, [=]() {
                 remove(pt1, pt2);
                 gameMap->update();
             });
 
+            //移去显示的连接路线
             QTimer::singleShot(500, gameMap, [this,index]() {
                 gameMap->clearSelected(index);  // 500ms 后清空
             });
 
+            //移去显示的连接路线
             QTimer::singleShot(800 ,this,[=](){
                 gameMap->disablePaintPath();
                 validPath.clear();
@@ -360,12 +368,14 @@ bool GameLogic::canLink(QPoint pt1, QPoint pt2 , int index) {
 
 
 
-// Basic conditions
+// 空格子判断
 bool GameLogic::isEmptyTile(QPoint pt) {
     int x = pt.x() , y=pt.y();
     return gameMap->getBoxType(x,y) <= 0;
 }
 
+
+//检查水平两点之间是否有障碍
 bool GameLogic::isClearRow(int row, int col1, int col2) {
     // these are  y , x1 , x2
     if (col1 > col2) std::swap(col1, col2);
@@ -375,6 +385,7 @@ bool GameLogic::isClearRow(int row, int col1, int col2) {
     return true;
 }
 
+//检查垂直两点之间是否有障碍
 bool GameLogic::isClearCol(int col, int row1, int row2) {
     //these are x , y1 , y2
     if (row1 > row2) std::swap(row1, row2);
@@ -384,7 +395,7 @@ bool GameLogic::isClearCol(int col, int row1, int row2) {
     return true;
 }
 
-
+//检查是否能直接通过一条直线连接
 bool GameLogic::canConnectStraight(QPoint p1, QPoint p2) {
     if (p1.x() == p2.x() && isClearCol(p1.x(), p1.y(), p2.y())) {
         validPath.clear();
@@ -399,7 +410,11 @@ bool GameLogic::canConnectStraight(QPoint p1, QPoint p2) {
     return false;
 }
 
+
+//检查时候能经过一次拐弯连接
 bool GameLogic::canConnectOneTurn(QPoint p1, QPoint p2) {
+
+    //一共可能有两个连接点，在两个角上
     QPoint corner1(p1.x(), p2.y());
     QPoint corner2(p2.x(), p1.y());
 
@@ -422,11 +437,14 @@ bool GameLogic::canConnectOneTurn(QPoint p1, QPoint p2) {
     return false;
 }
 
+
+//检查是否能经过两次拐弯连接
 bool GameLogic::canConnectTwoTurn(QPoint p1, QPoint p2) {
     int w = gameMap->getColNum();
     int h = gameMap->getRowNum();
     int b = gameMap->getBufferNum();
 
+    //寻找可能的“Z”形连接
     for (int x = b-1; x < w + b + 1; ++x) {
         QPoint pt1(x, p1.y());
         QPoint pt2(x, p2.y());
@@ -440,6 +458,7 @@ bool GameLogic::canConnectTwoTurn(QPoint p1, QPoint p2) {
         }
     }
 
+    //寻找可能的“N”形连接
     for (int y = b-1; y < h + b + 1; ++y) {
         QPoint pt1(p1.x(), y);
         QPoint pt2(p2.x(), y);
@@ -457,30 +476,42 @@ bool GameLogic::canConnectTwoTurn(QPoint p1, QPoint p2) {
 }
 
 
-
+//移除配对成功的一对方块
 void GameLogic::remove(QPoint pt_1 , QPoint pt_2)
 {
     int x1 = pt_1.x(), y1 = pt_1.y();
     int x2 = pt_2.x(), y2 = pt_2.y();
 
+    //将配对成功的两个方块重置为空地
+    //条件判断解决了remove和player更新的冲突
+    if (gameMap->getBoxType(x1,y1)!=-1 && gameMap->getBoxType(x1,y1)!=-2)
     gameMap->setBoxType(x1,y1,0);
+
+    if (gameMap->getBoxType(x2,y2)!=-1 && gameMap->getBoxType(x2,y2)!=-2)
     gameMap->setBoxType(x2,y2,0);
 
     gameMap->update();
-    //repaint the screen
+    //重新绘制地图
 
+
+    //特殊情况：
+    //如果消除任意一个是提示的方块，则要更新提示
     if (!hintPts.empty() &&
         ((pt_1 == hintPts[0] || pt_2 == hintPts[1]) ||
          (pt_1 == hintPts[1] || pt_2 == hintPts[0]))) {
         hintPts.clear();
         hintPath.clear();
+
+        //消除当前的
         gameMap->disablePaintHint();
+
+        //还剩时间就继续显示
         if (hintActive) showHint();
     }
 
+    //消除之后更新边缘方块和提示
     updateEdgePts();
     remainUnmatchedPairs();
-
 }
 
 
@@ -496,6 +527,7 @@ QPoint GameLogic::getPlayerPosition(int i )
 
 
 
+//更新玩家的位置
 void GameLogic::updatePlayerPosition(int index, QPoint newPos)
 {
     if (isPaused) return;
@@ -503,7 +535,7 @@ void GameLogic::updatePlayerPosition(int index, QPoint newPos)
     int col = newPos.x();
     int row = newPos.y();
 
-    // if it hit boundary , stay still
+    // 如果撞到边界，保持不动
     if (row < 0 || row >= gameMap->getRowNum() + 2 * gameMap->getBufferNum() ||
         col < 0 || col >= gameMap->getColNum() + 2 * gameMap->getBufferNum()) {
         qDebug() << "Invalid move: out of bounds";
@@ -512,7 +544,9 @@ void GameLogic::updatePlayerPosition(int index, QPoint newPos)
 
     int t = gameMap->getBoxType(col, row);
 \
-    if (t > 0) { // hit pair box
+    //如果撞到要连接的方块，
+    //根据player的序号添加响应的selected数组
+    if (t > 0) {
         if(index==1)
         {
             gameMap->addSelected(newPos);
@@ -525,7 +559,7 @@ void GameLogic::updatePlayerPosition(int index, QPoint newPos)
         }
     }
 
-    // prop logic (only active in single mode)
+    // 撞到道具的情况
     if (t < -2 && gameMode == 1) {
         switch (t) {
         case PROP_ADD_ONE:
@@ -552,7 +586,7 @@ void GameLogic::updatePlayerPosition(int index, QPoint newPos)
         }
     }
 
-    // === 区分不同玩家 ===
+    // 根据玩家的序号，进行位置的更新
     if (index == 1) {
         QPoint prevPos = gamePlayer->getPosition();  // 玩家1旧位置
         gamePlayer->setPosition(newPos);
@@ -573,7 +607,7 @@ void GameLogic::updatePlayerPosition(int index, QPoint newPos)
 }
 
 
-
+//更新边缘的方块的存储
 void GameLogic::updateEdgePts() {
     edgePts.clear();
     edgePtsByType.clear();  // 同步清空哈希表
@@ -601,7 +635,8 @@ void GameLogic::updateEdgePts() {
 }
 
 
-
+//检查是否还存在没有消除的方块
+//同时更新提示路径
 void GameLogic:: remainUnmatchedPairs()
 {
     detectMode = true;
@@ -651,7 +686,7 @@ void GameLogic::showHint() {
 
 
 
-
+//重置游戏参数
 void GameLogic::resetGamePara()
 {
     //TODO:
