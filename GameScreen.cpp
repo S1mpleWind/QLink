@@ -243,7 +243,7 @@ void GameScreen::onGameOver() {
     gameMenu->showEndMenu();
 }
 
-
+//设置模式单/双
 void GameScreen::setMode(int a)
 {
     gameLogic->setGameMode(a);
